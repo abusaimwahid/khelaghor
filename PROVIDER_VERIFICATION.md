@@ -32,3 +32,16 @@ No secret value was printed or written to documentation. Local mocks and unit te
 ## Phase 8 provisioning update
 
 The protected `khelaghor-staging` project exists, but provider statuses remain unchanged. Neon managed PostgreSQL is **BLOCKED** pending owner acceptance of marketplace terms. Cloudinary, Resend, SSLCommerz, courier, Sentry and analytics credentials/resources remain unavailable. No external workflow was simulated or promoted to PASS.
+
+## First staging attempt update
+
+| Provider/mode | Status | Actual result |
+| --- | --- | --- |
+| Neon | BLOCKED | Vercel still returns terms acceptance required; no installation/resource/connection exists |
+| Disabled staging storage | PASS locally | Explicit mode rejects hosted uploads/deletes with HTTP 503 and performs no filesystem persistence |
+| Database email logger | PASS locally | Explicit staging-only opt-in validated; no deployed database exists to test a real log row |
+| Cloudinary | BLOCKED | No credentials or real response |
+| Resend | BLOCKED | No credentials or real response |
+| SSLCommerz | BLOCKED | Mock remains selected; no sandbox response |
+| Courier | BLOCKED | Mock remains selected; no real provider response |
+| Monitoring/analytics | NOT TESTED | No staging resources/properties |

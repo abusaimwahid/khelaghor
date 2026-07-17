@@ -1,5 +1,55 @@
 # Staging Execution Log
 
+## Run 2026-07-18 — continuation retry
+
+- Preflight: branch `staging`, committed HEAD `23cb745`, staging-only local Vercel link, and no tracked environment file: **PASS**.
+- Neon installation check: `vercel integration installations` returned no installations: **BLOCKED**.
+- Neon installation retry: Vercel again returned `integration_terms_acceptance_required` for the `abusaimwahids-projects` scope: **BLOCKED**.
+- Database provisioning, Vercel database variables, migrations, synthetic seed, admin bootstrap, deployment, health, customer/admin smoke tests, role rehearsal and provider flows were not attempted after the prerequisite failure.
+- Production project settings, variables, deployments and domains were not targeted. No staging push was performed, avoiding another automatic database-less deployment.
+
+Required human evidence before continuation: the Neon installation must appear in `vercel integration installations` under `abusaimwahids-projects`. A statement that terms were accepted is not sufficient while the Vercel API continues to return the opposite state.
+
+## Run 2026-07-18 — first genuine staging deployment attempt
+
+Environment: protected Vercel project `khelaghor-staging`; branch `staging`; commit `23cb745`; tester: Codex. Production project `khelaghor` was not targeted.
+
+| Action | Expected | Actual | Status | Safe evidence |
+| --- | --- | --- | --- | --- |
+| Verify Git/project | Clean complete staging commit and staging-only local link | Clean branch at `23cb745`; `.vercel/project.json` names `khelaghor-staging` project ID `prj_aZH8…` | PASS | Git/Vercel CLI output |
+| Secret hygiene | No tracked environment files | `.env*` and `.vercel` ignored; no environment file returned by `git ls-files` | PASS | `git check-ignore`, `git ls-files` |
+| Automatic Vercel deployment | Build committed staging branch | Deployment `dpl_Ftq7Jq5bkAMtPT52dCc2YaXTEGtJ` cloned branch/commit correctly, compiled and typechecked, then failed during static generation because `DATABASE_URL` was absent | FAIL | Redacted Vercel build log |
+| Deployment URL | Ready protected staging hostname | `https://khelaghor-staging-i4jd4ic09-abusaimwahids-projects.vercel.app` exists as an ERROR deployment, not a usable staging URL | FAIL | `vercel inspect` |
+| Neon integration | Terms accepted and integration installed | Vercel returned `integration_terms_acceptance_required` twice and reports no Marketplace installation | BLOCKED | Vercel integration response |
+| Staging database/migrations | Separate Neon database; 12 migrations current | No resource or DATABASE_URL/DIRECT_URL exists; no migration command was pointed at staging | BLOCKED | Environment-variable names and integration list |
+| Explicit staging storage policy | No ephemeral hosted writes without credentials | Added `STORAGE_DRIVER=disabled`; upload/delete routes return honest HTTP 503; production rejects disabled/local modes | PASS locally | Environment tests and route implementation |
+| Explicit staging email policy | Database logger only by explicit staging opt-in | Added `EMAIL_PROVIDER=logger` plus `STAGING_ALLOW_EMAIL_LOGGER=true`; production/non-opt-in reject logger; no console email body in logger mode | PASS locally | Environment tests and notifier implementation |
+| Staging Vercel mock variables | Applied only to staging project | Updated encrypted variable names for disabled storage/logger and added opt-in; values not printed | PASS | `vercel env ls production` on linked staging project |
+| Admin/health/seed/smoke/roles | Real deployed workflows | Cannot run without database and READY deployment | BLOCKED | Failed prerequisite |
+
+The failed deployment is useful negative evidence: hosted compilation works, but the application refuses to pretend it is operational without a database. It is not counted as a staging build, health, or provider pass.
+
+### Production-project safety observation
+
+The existing `khelaghor` Production deployment remains the same 2-day-old Ready deployment and no production environment variable/domain was targeted. However, final read-only inspection revealed that Vercel automatically created an ERROR **Preview** deployment on the `khelaghor` project from the same `staging` branch push. This occurred because both Vercel projects are connected to the repository. No command in this run targeted, removed or reconfigured that project. Preventing future cross-project preview builds requires an owner-approved production-project Git deployment setting change; it is recorded as BLOCKED because the task forbids modifying that project.
+
+### Remaining unblock
+
+The Vercel account still has not registered Neon Marketplace terms acceptance despite the task context saying it was accepted. The owner must complete the acceptance while signed into the same `abusaimwahids-projects` scope and confirm the installation appears in Vercel. The agent cannot accept third-party legal terms. Then retry the integration, create/connect a staging-only resource, verify non-local hosts without printing values, deploy migrations, and redeploy.
+
+### Local verification after staging-policy change
+
+| Command | Result |
+| --- | --- |
+| `npm run db:check` | PASS on local development database only |
+| `npm run db:generate` | PASS — Prisma Client 6.19.3 |
+| `npx prisma migrate status` | PASS locally — 12 migrations current; staging BLOCKED |
+| `npm run lint` | PASS |
+| `npm run typecheck` | PASS |
+| `npm run test` | PASS — 13 files / 48 tests |
+| `npm run test:e2e` | PASS — 4 local Chromium workflows |
+| `npm run build` | PASS locally — 5.1s compile, 4.2s TypeScript, 46 generated static pages plus dynamic routes |
+
 ## Run 2026-07-18 — Phase 8 private staging provisioning
 
 | Action | Expected | Actual | Status | Safe evidence |

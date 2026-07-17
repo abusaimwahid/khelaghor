@@ -11,7 +11,7 @@ export const envSchema = z
     DATABASE_URL: z.string().min(1),
     DIRECT_URL: z.string().min(1).optional(),
     STORAGE_DRIVER: z
-      .enum(["local", "cloudinary", "s3", "r2"])
+      .enum(["local", "disabled", "cloudinary", "s3", "r2"])
       .default("local"),
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
@@ -23,7 +23,8 @@ export const envSchema = z
     COURIER_PROVIDER: z
       .enum(["mock", "pathao", "steadfast", "redx", "paperfly"])
       .default("mock"),
-    EMAIL_PROVIDER: z.enum(["dev", "resend"]).default("dev"),
+    EMAIL_PROVIDER: z.enum(["dev", "logger", "resend"]).default("dev"),
+    STAGING_ALLOW_EMAIL_LOGGER: z.coerce.boolean().default(false),
     EMAIL_FROM: z.string().default("KhelaGhor <hello@khelaghor.example>"),
     RESEND_API_KEY: z.string().optional(),
     COURIER_API_KEY: z.string().optional(),
@@ -59,6 +60,18 @@ export const envSchema = z
         path: ["STORAGE_DRIVER"],
         message: "Hosted environments require configured remote storage.",
       });
+    if (env.APP_ENV === "production" && env.STORAGE_DRIVER === "disabled")
+      ctx.addIssue({
+        code: "custom",
+        path: ["STORAGE_DRIVER"],
+        message: "Production requires configured remote storage.",
+      });
+    if (
+      ["preview", "staging"].includes(env.APP_ENV) &&
+      env.STORAGE_DRIVER === "disabled"
+    ) {
+      // Explicitly supported: upload routes return 503 and never write to disk.
+    }
     if (
       env.STORAGE_DRIVER === "cloudinary" &&
       (!env.CLOUDINARY_CLOUD_NAME ||
@@ -95,6 +108,16 @@ export const envSchema = z
         message: "Hosted environments require a configured email provider.",
       });
     if (
+      env.EMAIL_PROVIDER === "logger" &&
+      (env.APP_ENV !== "staging" || !env.STAGING_ALLOW_EMAIL_LOGGER)
+    )
+      ctx.addIssue({
+        code: "custom",
+        path: ["EMAIL_PROVIDER"],
+        message:
+          "Database email logging is allowed only in staging with explicit opt-in.",
+      });
+    if (
       env.EMAIL_PROVIDER === "resend" &&
       (!env.RESEND_API_KEY || /\.example[}>]?$/i.test(env.EMAIL_FROM))
     )
@@ -125,6 +148,8 @@ export function getEnv() {
     SSLCOMMERZ_STORE_PASSWORD: process.env.SSLCOMMERZ_STORE_PASSWORD,
     COURIER_PROVIDER: process.env.COURIER_PROVIDER || "mock",
     EMAIL_PROVIDER: process.env.EMAIL_PROVIDER || "dev",
+    STAGING_ALLOW_EMAIL_LOGGER:
+      process.env.STAGING_ALLOW_EMAIL_LOGGER || "false",
     EMAIL_FROM: process.env.EMAIL_FROM,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     COURIER_API_KEY: process.env.COURIER_API_KEY,

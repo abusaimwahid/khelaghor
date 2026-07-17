@@ -49,8 +49,9 @@ function renderEmail(input: EmailInput) {
 export async function sendEmail(input: EmailInput) {
   const env = getEnv();
   const rendered = renderEmail(input);
-  if (env.EMAIL_PROVIDER === "dev") {
-    console.info("[dev-email]", input.to, input.subject, rendered.plain);
+  if (env.EMAIL_PROVIDER === "dev" || env.EMAIL_PROVIDER === "logger") {
+    if (env.EMAIL_PROVIDER === "dev")
+      console.info("[dev-email]", input.to, input.subject, rendered.plain);
     await prisma.developmentEmailLog
       .create({
         data: {
@@ -69,7 +70,7 @@ export async function sendEmail(input: EmailInput) {
         },
       })
       .catch(() => undefined);
-    return { provider: "dev", sent: false };
+    return { provider: env.EMAIL_PROVIDER, sent: false };
   }
   if (env.EMAIL_PROVIDER === "resend") {
     if (!env.RESEND_API_KEY)

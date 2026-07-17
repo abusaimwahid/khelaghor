@@ -47,6 +47,34 @@ describe("staging readiness controls", () => {
       }).success,
     ).toBe(false);
   });
+  it("supports explicit safe staging mocks without weakening production", () => {
+    expect(
+      envSchema.safeParse({
+        ...base,
+        STORAGE_DRIVER: "disabled",
+        EMAIL_PROVIDER: "logger",
+        STAGING_ALLOW_EMAIL_LOGGER: true,
+        CLOUDINARY_CLOUD_NAME: undefined,
+        CLOUDINARY_API_KEY: undefined,
+        CLOUDINARY_API_SECRET: undefined,
+        RESEND_API_KEY: undefined,
+      }).success,
+    ).toBe(true);
+    expect(
+      envSchema.safeParse({
+        ...base,
+        APP_ENV: "production",
+        STORAGE_DRIVER: "disabled",
+      }).success,
+    ).toBe(false);
+    expect(
+      envSchema.safeParse({
+        ...base,
+        EMAIL_PROVIDER: "logger",
+        STAGING_ALLOW_EMAIL_LOGGER: false,
+      }).success,
+    ).toBe(false);
+  });
   it("keeps unknown and returned courier states from changing orders", () => {
     expect(mapCourierStatus("unknown")).toBeNull();
     expect(mapCourierStatus("returned_to_origin")).toBeNull();

@@ -47,3 +47,5 @@ The rehearsal is incomplete until payment/courier/email sandboxes, backup restor
 | Staging health and monitoring | BLOCKED |
 
 Reason: no private staging URL/database/provider configuration exists. Local automated results remain recorded above but do not change these staging statuses.
+
+First staging attempt: the protected project exists, but its initial deployment failed on missing `DATABASE_URL`. No rehearsal row changes status; compilation success is not substituted for a working deployment or database-backed workflow.

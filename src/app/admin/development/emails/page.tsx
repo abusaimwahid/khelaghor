@@ -1,17 +1,19 @@
 import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { prisma } from "@/server/db";
 import { requirePermission } from "@/server/security";
+import { getEnv } from "@/server/env";
 
 export const dynamic = "force-dynamic";
 
 export default async function DevelopmentEmailsPage() {
   await requirePermission("settings.update");
-  if (process.env.NODE_ENV === "production") {
+  const env = getEnv();
+  if (env.EMAIL_PROVIDER !== "dev" && env.EMAIL_PROVIDER !== "logger") {
     return (
       <AdminShell>
         <AdminHero
           title="Development Emails"
-          description="Disabled in production."
+          description="Email logging is disabled for the configured provider."
         />
       </AdminShell>
     );
@@ -24,7 +26,7 @@ export default async function DevelopmentEmailsPage() {
     <AdminShell>
       <AdminHero
         title="Development Emails"
-        description="Local email logger previews for workflow notifications. No secrets are stored."
+        description="Development or explicitly enabled staging email previews. No provider secrets are stored."
       />
       <section className="kg-card overflow-hidden">
         <div className="overflow-x-auto">

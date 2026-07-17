@@ -6,6 +6,8 @@ No staging URL/database exists, so no staging account was created and no interac
 
 Phase 8 update: the protected `khelaghor-staging` Vercel project now exists, but it has no deployment or database. All interactive role and final-admin staging scenarios therefore remain BLOCKED; no code-inspection result was relabelled as a staging pass.
 
+First-deployment update: deployment `dpl_Ftq7…` failed before becoming READY because `DATABASE_URL` is absent. Consequently every browser/direct-request role scenario and staging final-admin scenario remains BLOCKED.
+
 ## Role-by-role staging matrix
 
 Each cell is **BLOCKED**: the required staging account and deployment do not exist.

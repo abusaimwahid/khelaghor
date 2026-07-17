@@ -29,6 +29,13 @@ export type StorageProvider = {
   delete(key: string): Promise<void>;
 };
 
+export class StorageUnavailableError extends Error {
+  constructor() {
+    super("Uploads are unavailable in this staging environment.");
+    this.name = "StorageUnavailableError";
+  }
+}
+
 const allowedMimeTypes = new Map([
   ["image/jpeg", ".jpg"],
   ["image/png", ".png"],
@@ -316,8 +323,18 @@ class UnconfiguredStorageProvider implements StorageProvider {
   }
 }
 
+class DisabledStorageProvider implements StorageProvider {
+  async upload(): Promise<StoredFile> {
+    throw new StorageUnavailableError();
+  }
+  async delete() {
+    throw new StorageUnavailableError();
+  }
+}
+
 export function getStorageProvider(): StorageProvider {
   const driver = getEnv().STORAGE_DRIVER;
+  if (driver === "disabled") return new DisabledStorageProvider();
   if (driver === "cloudinary") return new CloudinaryStorageProvider();
   if (driver === "s3") return new UnconfiguredStorageProvider("S3");
   if (driver === "r2") return new UnconfiguredStorageProvider("Cloudflare R2");

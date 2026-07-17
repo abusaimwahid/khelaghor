@@ -4,6 +4,10 @@ Date: 2026-07-18. Evidence target: private staging. Allowed statuses: **PASS**, 
 
 Phase 8 infrastructure note: the separate protected `khelaghor-staging` Vercel project and `staging` Git branch now exist. The project has no deployment because managed PostgreSQL provisioning requires owner acceptance of Neon marketplace terms and remote storage/email prerequisites remain absent. Production `khelaghor` was not changed.
 
+First-attempt note: Vercel automatically attempted commit `23cb745`; compilation/typecheck passed but deployment ended ERROR because no `DATABASE_URL` exists. Neon still reports terms acceptance required. Secure disabled-upload and staging database-logger modes now exist locally, but no remote workflow can pass until a database is connected and a new reviewed commit is deployed.
+
+Repository integration note: the production `khelaghor` project also auto-created an ERROR Preview from the `staging` branch because both projects share the repository. The real Production deployment remains unchanged. Future staging pushes must not proceed until the owner authorizes isolating production-project Git preview behavior.
+
 | Category | Status | Evidence / blocker |
 | --- | --- | --- |
 | Build | PASS | Local production build completes; staging build is unavailable |

@@ -1,5 +1,24 @@
 # KhelaGhor Project Status
 
+## Staging provisioning continuation retry (July 18, 2026)
+
+- Reconfirmed branch `staging` at preflight commit `23cb745`, staging-only local Vercel link and secret-file hygiene.
+- Vercel still lists no Marketplace installation and again returned `integration_terms_acceptance_required` for Neon under `abusaimwahids-projects`.
+- Stopped before database creation, variables, migrations, seed, admin bootstrap, push or deployment, as required. No production-project command was issued.
+- Safe staging-policy/evidence changes were locally validated and may be committed locally, but will not be pushed until Neon is visibly installed; pushing would trigger another known-failing deployment.
+- Decision remains **NO-GO**.
+
+## First real staging attempt (July 18, 2026)
+
+- Verified a clean `staging` branch at `23cb745`, staging-only Vercel link, ignored/untracked environment files and unchanged production project targeting.
+- Captured the first real staging deployment attempt: Vercel cloned the correct branch/commit and completed compilation and TypeScript, but static generation failed because `DATABASE_URL` is absent. Deployment `dpl_Ftq7…` is ERROR and is not presented as a working staging URL.
+- Retried Neon installation twice. Vercel still returns `integration_terms_acceptance_required` and lists no Marketplace installation, so no database, migration, admin, health, seed or smoke workflow was attempted.
+- Implemented an explicit secure staging-mock policy. `STORAGE_DRIVER=disabled` causes honest HTTP 503 upload/delete responses and never writes to ephemeral disk. `EMAIL_PROVIDER=logger` is permitted only for `APP_ENV=staging` with explicit `STAGING_ALLOW_EMAIL_LOGGER=true`, persists previews in the existing database log and avoids console email bodies. Production continues to reject local/disabled storage and logger/dev email.
+- Updated only the staging project's encrypted storage/email mode variables. Cloudinary and Resend remain unverified and BLOCKED; no external provider was relabelled as passed.
+- Go-live remains **NO-GO**. Exact next action: complete Neon Marketplace acceptance in the same Vercel team scope, then install/connect the database and run migrations before redeploying.
+- Post-change local verification passed: local database check, Prisma generation, 12 migrations current, ESLint, TypeScript, 13 Vitest files / 48 tests, 4/4 Playwright workflows and production build (5.1-second compile, 46 generated static pages plus dynamic routes).
+- Final read-only Vercel inspection found that the existing `khelaghor` project automatically created an ERROR Preview deployment from the shared repository's `staging` branch. Its 2-day-old Production deployment remains unchanged and Ready, and no command here targeted its settings, variables, domain or deployments. Preventing future production-project preview builds needs a separately authorized Git deployment-setting change on that project.
+
 ## Phase 8 private staging provisioning (July 18, 2026)
 
 - Confirmed the Vercel identity, existing projects, dirty working tree and committed HEAD before mutation. The existing production project `khelaghor` retains its prior deployment and was not linked, configured or redeployed.
