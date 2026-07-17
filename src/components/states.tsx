@@ -18,8 +18,10 @@ export function EmptyState({
   icon: Icon = PackageSearch,
 }: StateProps) {
   return (
-    <div className="rounded-lg border border-dashed border-[var(--border)] bg-cream p-8 text-center">
-      <Icon className="mx-auto h-10 w-10 text-coral" />
+    <div className="rounded-[20px] border border-dashed border-coral/30 bg-gradient-to-br from-[#fff7f8] to-[#f5fbfa] p-10 text-center">
+      <span className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white shadow-sm">
+        <Icon className="h-9 w-9 text-coral" />
+      </span>
       <h2 className="mt-4 text-xl font-black text-navy">{title}</h2>
       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
         {description}

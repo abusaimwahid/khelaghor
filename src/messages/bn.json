@@ -1,0 +1,7 @@
+{
+  "global": { "language": "ভাষা", "english": "English", "bangla": "বাংলা", "search": "খুঁজুন", "account": "অ্যাকাউন্ট", "wishlist": "পছন্দের তালিকা", "cart": "কার্ট", "notifications": "বিজ্ঞপ্তি", "allCategories": "সব বিভাগ" },
+  "storefront": { "shop": "কেনাকাটা", "addToCart": "কার্টে যোগ করুন", "checkout": "চেকআউট", "delivery": "ডেলিভারি", "reviews": "রিভিউ", "orderConfirmed": "অর্ডার নিশ্চিত হয়েছে" },
+  "account": { "dashboard": "ড্যাশবোর্ড", "orders": "অর্ডার", "addresses": "ঠিকানা", "returns": "ফেরত", "support": "সহায়তা", "profile": "প্রোফাইল", "security": "নিরাপত্তা" },
+  "auth": { "login": "লগ ইন", "register": "অ্যাকাউন্ট তৈরি করুন", "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন", "resetPassword": "পাসওয়ার্ড পুনরায় সেট করুন" },
+  "states": { "loading": "লোড হচ্ছে…", "empty": "এখানে এখনো কিছু নেই।", "error": "কিছু ভুল হয়েছে।", "success": "সফলভাবে সংরক্ষিত হয়েছে।" }
+}

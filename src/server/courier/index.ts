@@ -11,6 +11,7 @@ export type CourierStatus =
   | "delivered"
   | "cancelled"
   | "failed"
+  | "returned_to_origin"
   | "unknown";
 
 export type ShipmentRequest = {

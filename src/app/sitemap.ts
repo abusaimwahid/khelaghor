@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     process.env.NEXT_PUBLIC_APP_URL ??
     "http://localhost:3000"
   ).replace(/\/$/, "");
-  return [
+  const paths = [
     "/",
     "/shop",
     "/categories",
@@ -15,8 +15,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/about-us",
     "/contact-us",
   ]
-    .map((path) => ({ url: `${base}${path}` }))
-    .concat(categories.map((c) => ({ url: `${base}/categories/${c.slug}` })))
-    .concat(products.map((p) => ({ url: `${base}/products/${p.slug}` })))
-    .concat(blogPosts.map((p) => ({ url: `${base}/blog/${p.slug}` })));
+    .concat(categories.map((c) => `/categories/${c.slug}`))
+    .concat(products.map((p) => `/products/${p.slug}`))
+    .concat(blogPosts.map((p) => `/blog/${p.slug}`));
+  return paths.flatMap((path) => {
+    const english = `${base}${path === "/" ? "" : path}`;
+    const bangla = `${base}/bn${path === "/" ? "" : path}`;
+    const languages = { en: english, bn: bangla, "x-default": english };
+    return [
+      { url: english, alternates: { languages } },
+      { url: bangla, alternates: { languages } },
+    ];
+  });
 }

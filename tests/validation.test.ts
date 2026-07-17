@@ -1,10 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { checkoutSchema, productSchema, registerSchema } from "@/server/validation";
+import {
+  checkoutSchema,
+  productSchema,
+  registerSchema,
+} from "@/server/validation";
 
 describe("server validation", () => {
   it("requires strong registration data", () => {
-    expect(registerSchema.safeParse({ name: "A", email: "bad", phone: "1", password: "short" }).success).toBe(false);
-    expect(registerSchema.safeParse({ name: "Nusrat", email: "NUSRAT@EXAMPLE.COM", phone: "01700000000", password: "Strong123" }).success).toBe(true);
+    expect(
+      registerSchema.safeParse({
+        name: "A",
+        email: "bad",
+        phone: "1",
+        password: "short",
+      }).success,
+    ).toBe(false);
+    expect(
+      registerSchema.safeParse({
+        name: "Nusrat",
+        email: "NUSRAT@EXAMPLE.COM",
+        phone: "01700000000",
+        password: "StrongLaunch123!",
+      }).success,
+    ).toBe(true);
   });
 
   it("prevents negative product stock and invalid slugs", () => {
@@ -28,9 +46,9 @@ describe("server validation", () => {
       fullName: "Nusrat Jahan",
       phone: "01700000000",
       email: "nusrat@example.com",
-      division: "Dhaka",
-      district: "Dhaka",
-      area: "Dhanmondi",
+      divisionId: "dhaka",
+      districtId: "dhaka-dhaka",
+      areaId: "dhaka-dhanmondi",
       address: "House 1, Road 2",
       deliveryMethod: "STANDARD",
       paymentMethod: "COD",

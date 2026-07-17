@@ -2,12 +2,22 @@ import Link from "next/link";
 
 type LogoVariant = "default" | "light" | "compact" | "admin";
 
-export function Logo({ variant = "default" }: { variant?: LogoVariant }) {
+export function Logo({
+  variant = "default",
+  storeName = "KhelaGhor",
+  tagline = "Play. Smile. Learn.",
+  href = "/",
+}: {
+  variant?: LogoVariant;
+  storeName?: string;
+  tagline?: string;
+  href?: string;
+}) {
   const light = variant === "light";
   const compact = variant === "compact";
   return (
     <Link
-      href="/"
+      href={href}
       className={`flex min-w-0 items-center gap-2 ${light ? "text-white" : "text-navy"}`}
       aria-label="KhelaGhor home"
     >
@@ -15,12 +25,12 @@ export function Logo({ variant = "default" }: { variant?: LogoVariant }) {
       {!compact ? (
         <span className="min-w-0 leading-tight">
           <strong className="block truncate text-xl font-black tracking-normal">
-            KhelaGhor
+            {storeName}
           </strong>
           <span
             className={`block truncate text-xs font-semibold ${light ? "text-white/70" : "text-teal"}`}
           >
-            Play • Smile • Learn
+            {tagline}
           </span>
         </span>
       ) : null}

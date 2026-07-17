@@ -19,7 +19,8 @@ export async function assertRateLimit(scope: string, limit = 10) {
     buckets.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return;
   }
-  if (bucket.count >= limit) throw new Error("Too many requests. Please wait a minute and try again.");
+  if (bucket.count >= limit)
+    throw new Error("Too many requests. Please wait a minute and try again.");
   bucket.count += 1;
 }
 
@@ -34,7 +35,9 @@ export async function verifyPassword(password: string, hash: string) {
 export async function createSession(userId: string) {
   const token = crypto.randomBytes(32).toString("base64url");
   const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
-  await prisma.session.create({ data: { userId, sessionToken: token, expires } });
+  await prisma.session.create({
+    data: { userId, sessionToken: token, expires },
+  });
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -48,7 +51,8 @@ export async function createSession(userId: string) {
 export async function destroySession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (token) await prisma.session.deleteMany({ where: { sessionToken: token } });
+  if (token)
+    await prisma.session.deleteMany({ where: { sessionToken: token } });
   cookieStore.delete(SESSION_COOKIE);
 }
 
@@ -61,12 +65,24 @@ export async function currentUser() {
     include: {
       user: {
         include: {
-          roles: { include: { role: { include: { permissions: { include: { permission: true } } } } } },
+          roles: {
+            include: {
+              role: {
+                include: { permissions: { include: { permission: true } } },
+              },
+            },
+          },
+          permissionOverrides: { include: { permission: true } },
         },
       },
     },
   });
-  if (!session || session.expires < new Date() || session.user.status !== "ACTIVE") return null;
+  if (
+    !session ||
+    session.expires < new Date() ||
+    session.user.status !== "ACTIVE"
+  )
+    return null;
   return session.user;
 }
 
@@ -77,16 +93,24 @@ export async function requireUser() {
 }
 
 export function userPermissions(user: Awaited<ReturnType<typeof currentUser>>) {
-  return (
-    user?.roles.flatMap((ur) => ur.role.permissions.map((rp) => rp.permission.key)) ?? []
+  const inherited = new Set(
+    user?.roles.flatMap((ur) =>
+      ur.role.permissions.map((rp) => rp.permission.key),
+    ) ?? [],
   );
+  for (const override of user?.permissionOverrides ?? []) {
+    if (override.effect === "DENY") inherited.delete(override.permission.key);
+    else inherited.add(override.permission.key);
+  }
+  return [...inherited];
 }
 
 export async function requirePermission(permission: string) {
   const user = await currentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent("/admin")}`);
   const permissions = userPermissions(user);
-  if (!permissions.includes("*") && !permissions.includes(permission)) redirect("/");
+  if (!permissions.includes("*") && !permissions.includes(permission))
+    redirect(`/forbidden?area=${encodeURIComponent("admin")}`);
   return user;
 }
 

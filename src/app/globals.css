@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fff8ec;
+  --background: #fbfaf8;
   --foreground: #17233f;
   --navy: #10264a;
   --navy-2: #153963;
@@ -11,14 +11,15 @@
   --orange: #ff9f1c;
   --cream: #fff8ec;
   --muted: #64748b;
-  --border: #eadfce;
+  --border: #e8edf3;
   --card: #ffffff;
   --success: #11805d;
   --warning: #b7791f;
   --danger: #c2414b;
   --surface: #ffffff;
   --surface-soft: #f7f9fb;
-  --shadow-soft: 0 12px 30px rgb(16 38 74 / 0.08);
+  --shadow-soft: 0 12px 34px rgb(16 38 74 / 0.07);
+  --shadow-hover: 0 20px 48px rgb(16 38 74 / 0.13);
 }
 
 @theme inline {
@@ -45,6 +46,36 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+main {
+  min-height: 55vh;
+  background:
+    radial-gradient(
+      circle at 8% 4%,
+      rgb(255 209 102 / 0.11),
+      transparent 24rem
+    ),
+    radial-gradient(
+      circle at 92% 8%,
+      rgb(22 163 148 / 0.08),
+      transparent 26rem
+    ),
+    var(--background);
+}
+
+::selection {
+  background: rgb(255 92 117 / 0.22);
+  color: var(--navy);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html[lang="bn"] body {
+  font-family: var(--font-bengali), var(--font-nunito), sans-serif;
+  line-height: 1.65;
+}
+
 a {
   text-decoration: none;
 }
@@ -67,7 +98,7 @@ svg {
 }
 
 .container {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1280px, calc(100% - 32px));
   margin-inline: auto;
 }
 
@@ -82,7 +113,7 @@ svg {
 
 .kg-card {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 18px;
   background: var(--surface);
   box-shadow: var(--shadow-soft);
 }
@@ -90,7 +121,7 @@ svg {
 .kg-input {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 14px;
   background: white;
   padding: 0.75rem 0.875rem;
   color: var(--navy);
@@ -109,7 +140,7 @@ svg {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 0.65rem 1rem;
   font-weight: 900;
   line-height: 1;
@@ -148,6 +179,62 @@ svg {
   box-shadow: var(--shadow-soft);
 }
 
+.storefront-page {
+  padding-block: clamp(1.5rem, 4vw, 3.5rem);
+}
+.storefront-surface {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: var(--shadow-soft);
+}
+.storefront-eyebrow {
+  color: var(--teal);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.storefront-title {
+  color: var(--navy);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+.storefront-muted {
+  color: var(--muted);
+  line-height: 1.75;
+}
+.storefront-breadcrumb {
+  color: #718096;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+.storefront-breadcrumb a {
+  transition: color 160ms ease;
+}
+.storefront-breadcrumb a:hover {
+  color: var(--coral);
+}
+.storefront-panel-title {
+  color: var(--navy);
+  font-size: 1.125rem;
+  font-weight: 900;
+}
+
+@media (hover: hover) {
+  .storefront-surface {
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease;
+  }
+  .storefront-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+}
+
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -163,4 +250,175 @@ details > summary {
 
 details > summary::-webkit-details-marker {
   display: none;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes kg-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kg-home section {
+  animation: kg-fade-up 420ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .container {
+    width: min(100% - 24px, 1280px);
+  }
+}
+
+/* Restrained operations design system */
+.admin-ui {
+  color: #24334d;
+}
+.admin-ui .kg-card,
+.admin-section,
+.admin-stat {
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgb(16 38 74 / 0.045);
+}
+.admin-ui .kg-stat {
+  border-radius: 12px;
+  border-color: #e3e8ef;
+  box-shadow: 0 2px 8px rgb(16 38 74 / 0.045);
+}
+.admin-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #dfe5ec;
+  padding-bottom: 1.25rem;
+}
+.admin-page-title {
+  margin-top: 0.25rem;
+  color: var(--navy);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+}
+.admin-eyebrow {
+  color: var(--teal);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.admin-section-title {
+  color: var(--navy);
+  font-size: 1rem;
+  font-weight: 900;
+}
+.admin-stat {
+  padding: 1.1rem;
+}
+.admin-input {
+  width: 100%;
+  border: 1px solid #dce3eb;
+  border-radius: 9px;
+  background: #fff;
+  padding-inline: 0.75rem;
+  outline: none;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+.admin-input:focus {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgb(255 92 117 / 0.1);
+}
+.admin-button {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 9px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+}
+.admin-button-primary {
+  background: var(--coral);
+  color: white;
+}
+.admin-icon-button {
+  display: grid;
+  height: 2.5rem;
+  width: 2.5rem;
+  place-items: center;
+  border: 1px solid #e0e6ed;
+  border-radius: 9px;
+  background: white;
+  color: var(--navy);
+}
+.admin-ui table thead {
+  background: #f6f8fa !important;
+  color: #64748b;
+}
+.admin-ui table th {
+  white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.admin-ui table tbody tr {
+  transition: background-color 120ms;
+}
+.admin-ui table tbody tr:hover {
+  background: #fafbfc;
+}
+.admin-ui table td,
+.admin-ui table th {
+  padding: 0.8rem !important;
+}
+.admin-ui input:not([type="checkbox"]):not([type="radio"]),
+.admin-ui select,
+.admin-ui textarea {
+  border-color: #dce3eb;
+}
+.admin-ui input:focus,
+.admin-ui select:focus,
+.admin-ui textarea:focus {
+  outline: 2px solid rgb(255 92 117 / 0.14);
+  outline-offset: 1px;
+  border-color: var(--coral);
+}
+@media (max-width: 767px) {
+  .admin-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .admin-ui table td,
+  .admin-ui table th {
+    padding: 0.7rem !important;
+  }
 }

@@ -13,14 +13,14 @@ export default async function CartPage() {
   const cart = await getCurrentCart(user?.id);
   const totals = secureCartTotals(cart);
   return (
-    <div className="container grid gap-8 py-10 lg:grid-cols-[1fr_360px]">
+    <div className="container storefront-page grid gap-8 lg:grid-cols-[1fr_380px]">
       <section className="kg-card p-5 md:p-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-black uppercase text-teal">
               Review items
             </p>
-            <h1 className="text-3xl font-black text-navy">Shopping Cart</h1>
+            <h1 className="storefront-title mt-1">Shopping Cart</h1>
           </div>
           <Link href="/shop" className="kg-button kg-button-secondary">
             Continue shopping
@@ -31,7 +31,7 @@ export default async function CartPage() {
             cart.items.map((item) => (
               <div
                 key={item.id}
-                className="grid gap-4 rounded-lg border border-[var(--border)] p-4 md:grid-cols-[1fr_140px_120px]"
+                className="grid gap-4 rounded-[16px] border border-[var(--border)] bg-gradient-to-r from-white to-[#fbfcfd] p-5 transition hover:shadow-md md:grid-cols-[1fr_140px_120px]"
               >
                 <div>
                   <strong className="text-navy">{item.product.name}</strong>
@@ -83,7 +83,7 @@ export default async function CartPage() {
           )}
         </div>
       </section>
-      <aside className="kg-card h-fit p-6 lg:sticky lg:top-36">
+      <aside className="kg-card h-fit p-7 lg:sticky lg:top-40">
         <h2 className="text-xl font-black text-navy">Order Summary</h2>
         <div className="mt-4 space-y-3 text-sm">
           <p className="flex justify-between">

@@ -1,0 +1,10 @@
+CREATE INDEX "User_status_updatedAt_idx" ON "User"("status", "updatedAt");
+CREATE INDEX "User_phone_idx" ON "User"("phone");
+CREATE INDEX "ProductCategory_categoryId_productId_idx" ON "ProductCategory"("categoryId", "productId");
+CREATE INDEX "Order_paymentStatus_createdAt_idx" ON "Order"("paymentStatus", "createdAt");
+CREATE INDEX "Order_userId_createdAt_idx" ON "Order"("userId", "createdAt");
+CREATE INDEX "Payment_orderId_status_idx" ON "Payment"("orderId", "status");
+CREATE INDEX "Payment_reference_idx" ON "Payment"("reference");
+CREATE INDEX "AuditLog_userId_createdAt_idx" ON "AuditLog"("userId", "createdAt");
+CREATE INDEX "AuditLog_entity_entityId_createdAt_idx" ON "AuditLog"("entity", "entityId", "createdAt");
+CREATE INDEX "AuditLog_action_createdAt_idx" ON "AuditLog"("action", "createdAt");

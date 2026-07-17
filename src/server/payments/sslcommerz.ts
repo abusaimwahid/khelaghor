@@ -105,6 +105,12 @@ export async function createSslCommerzSession(orderId: string) {
       },
     },
   });
+  if (body.sessionkey) {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { sessionKey: body.sessionkey, validationStatus: body.status },
+    });
+  }
   if (body.status !== "SUCCESS" || !body.GatewayPageURL)
     throw new Error(
       body.failedreason || "SSLCommerz gateway URL was not returned.",
@@ -132,13 +138,15 @@ function validateCallbackSignature(payload: CallbackPayload) {
 async function verifyWithSslCommerz(payload: CallbackPayload) {
   const env = getEnv();
   if (env.SSLCOMMERZ_MODE === "mock")
-    return payload.status === "VALID" || payload.status === "VALIDATED";
+    return payload.status === "VALID" || payload.status === "VALIDATED"
+      ? { tranId: payload.tran_id, amount: payload.amount, currency: payload.currency }
+      : null;
   if (
     !env.SSLCOMMERZ_STORE_ID ||
     !env.SSLCOMMERZ_STORE_PASSWORD ||
     !payload.val_id
   )
-    return false;
+    return null;
   const params = new URLSearchParams({
     val_id: payload.val_id,
     store_id: env.SSLCOMMERZ_STORE_ID,
@@ -149,7 +157,7 @@ async function verifyWithSslCommerz(payload: CallbackPayload) {
     `${endpoint("validator/api/validationserverAPI.php")}?${params.toString()}`,
     { method: "GET" },
   );
-  if (!response.ok) return false;
+  if (!response.ok) return null;
   const body = (await response.json()) as {
     status?: string;
     tran_id?: string;
@@ -159,7 +167,7 @@ async function verifyWithSslCommerz(payload: CallbackPayload) {
   return (
     ["VALID", "VALIDATED"].includes(body.status ?? "") &&
     body.tran_id === payload.tran_id
-  );
+  ) ? { tranId: body.tran_id, amount: body.amount, currency: body.currency } : null;
 }
 
 export async function handleSslCommerzCallback(
@@ -187,15 +195,19 @@ export async function handleSslCommerzCallback(
     }));
 
   const signatureValid = validateCallbackSignature(payload);
-  const gatewayVerified =
+  const validation =
     type === "success" || type === "ipn"
       ? await verifyWithSslCommerz(payload)
-      : false;
+      : null;
+  const expectedAmount = Number(order.total).toFixed(2);
+  const amountValid = validation ? Number(validation.amount).toFixed(2) === expectedAmount : false;
+  const currencyValid = validation?.currency === "BDT";
+  const providerReference = payload.bank_tran_id ?? payload.val_id;
   await prisma.paymentTransaction.create({
     data: {
       paymentId: payment.id,
       type: `SSLCOMMERZ_${type.toUpperCase()}`,
-      verified: signatureValid && gatewayVerified,
+      verified: signatureValid && Boolean(validation) && amountValid && currencyValid,
       payload: redactPayload(payload),
     },
   });
@@ -205,7 +217,9 @@ export async function handleSslCommerzCallback(
       where: { id: payment.id },
       data: {
         status: PaymentStatus.FAILED,
-        reference: payload.bank_tran_id ?? payload.val_id,
+        reference: providerReference,
+        callbackAt: new Date(),
+        failureReason: type,
       },
     });
     await prisma.order.update({
@@ -215,36 +229,48 @@ export async function handleSslCommerzCallback(
     return { ok: false, redirect: `/payment/failure?order=${order.number}` };
   }
 
-  if (!signatureValid || !gatewayVerified)
+  if (!signatureValid || !validation || !amountValid || !currencyValid)
     return {
       ok: false,
       redirect: `/payment/failure?order=${order.number}&reason=verification`,
     };
   if (payment.status !== PaymentStatus.PAID) {
-    await prisma.$transaction([
-      prisma.payment.update({
+    if (providerReference) {
+      const reused = await prisma.payment.findFirst({
+        where: { reference: providerReference, NOT: { orderId: order.id } },
+        select: { id: true },
+      });
+      if (reused) return { ok: false, redirect: `/payment/failure?order=${order.number}&reason=transaction-reused` };
+    }
+    await prisma.$transaction(async (tx) => {
+      const current = await tx.payment.findUniqueOrThrow({ where: { id: payment.id } });
+      if (current.status === PaymentStatus.PAID) return;
+      await tx.payment.update({
         where: { id: payment.id },
         data: {
           status: PaymentStatus.PAID,
-          reference: payload.bank_tran_id ?? payload.val_id,
+          reference: providerReference,
+          validationStatus: payload.status,
+          callbackAt: new Date(),
+          ...(type === "ipn" ? { ipnAt: new Date() } : {}),
         },
-      }),
-      prisma.order.update({
+      });
+      await tx.order.update({
         where: { id: order.id },
         data: {
           paymentStatus: PaymentStatus.PAID,
           status: OrderStatus.PAYMENT_CONFIRMED,
         },
-      }),
-      prisma.orderStatusHistory.create({
+      });
+      await tx.orderStatusHistory.create({
         data: {
           orderId: order.id,
           fromStatus: order.status,
           toStatus: OrderStatus.PAYMENT_CONFIRMED,
           note: "SSLCommerz payment verified",
         },
-      }),
-    ]);
+      });
+    });
     await audit({
       action: "payment.verified",
       entity: "Order",

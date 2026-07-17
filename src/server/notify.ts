@@ -9,7 +9,15 @@ const emailTemplatesByType: Record<string, EmailTemplate> = {
   ORDER_DELIVERED: "order-delivered",
   PASSWORD_RESET: "password-reset",
   RETURN_UPDATED: "return-update",
+  RETURN_SUBMITTED: "return-update",
+  RETURN_APPROVED: "return-update",
+  RETURN_REJECTED: "return-update",
+  REFUND_APPROVED: "refund-update",
+  REFUND_COMPLETED: "refund-update",
   SUPPORT_UPDATED: "support-reply",
+  SUPPORT_REPLY: "support-reply",
+  REVIEW_APPROVED: "review-moderation",
+  REVIEW_REJECTED: "review-moderation",
 };
 
 export async function notifyUser(input: {
@@ -18,6 +26,9 @@ export async function notifyUser(input: {
   title: string;
   body: string;
   email?: string | null;
+  resourceType?: string;
+  resourceId?: string;
+  href?: string;
 }) {
   if (input.userId) {
     await prisma.notification.create({
@@ -26,6 +37,9 @@ export async function notifyUser(input: {
         type: input.type,
         title: input.title,
         body: input.body,
+        resourceType: input.resourceType,
+        resourceId: input.resourceId,
+        href: input.href,
       },
     });
   }

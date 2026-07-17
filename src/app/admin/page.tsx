@@ -1,4 +1,5 @@
 import { AdminHero, AdminShell } from "@/components/admin-shell";
+import { AdminStat } from "@/components/admin/admin-ui";
 import { AdminTable } from "@/components/sections";
 import { requirePermission } from "@/server/security";
 import { prisma } from "@/server/db";
@@ -48,12 +49,14 @@ export default async function AdminPage() {
         title="Operations Dashboard"
         description="Protected admin surface with RBAC-ready modules, live catalog/order data and production-oriented operational shortcuts."
       />
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map(([label, value]) => (
-          <div key={label} className="kg-stat">
-            <p className="text-sm font-bold text-slate-500">{label}</p>
-            <strong className="mt-2 block text-2xl text-navy">{value}</strong>
-          </div>
+          <AdminStat
+            key={label}
+            label={label}
+            value={value}
+            detail="Live database snapshot"
+          />
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-2">

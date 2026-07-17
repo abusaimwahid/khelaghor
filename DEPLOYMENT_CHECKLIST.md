@@ -1,5 +1,17 @@
 # KhelaGhor Deployment Checklist
 
+## Phase 4 launch gates
+
+- [ ] Staff role boundaries and restricted mutations verified.
+- [ ] Admin credentials rotated; final active Super Admin protected.
+- [ ] Bangladesh legal content and update dates reviewed by qualified counsel.
+- [ ] Real contact details, product data, stock, delivery fees and COD rules verified.
+- [ ] Email sender, SSLCommerz sandbox and courier sandbox verified.
+- [ ] Encrypted database/upload backup restored successfully in isolation.
+- [ ] Monitoring, domain, TLS, canonical URLs, robots, sitemap and SEO verified.
+- [ ] Accessibility, Bangla clipping, responsive matrix and mobile performance measured.
+- [ ] Reconciliation has no unexplained high-severity findings.
+
 ## Before Deploy
 
 - [ ] Production PostgreSQL database created.

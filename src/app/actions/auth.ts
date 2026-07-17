@@ -25,7 +25,8 @@ export async function registerAction(formData: FormData) {
   const existing = await prisma.user.findUnique({
     where: { email: parsed.data.email },
   });
-  if (existing) redirect("/register?error=Email already registered");
+  if (existing)
+    redirect("/register?error=Unable to create account with those details");
   const user = await prisma.user.create({
     data: {
       name: parsed.data.name,
@@ -55,11 +56,48 @@ export async function loginAction(formData: FormData) {
     where: { email: parsed.data.email },
     include: { roles: true },
   });
+  const now = new Date();
+  const locked = Boolean(user?.lockedUntil && user.lockedUntil > now);
   if (
     !user?.passwordHash ||
+    user.status !== "ACTIVE" ||
+    locked ||
     !(await verifyPassword(parsed.data.password, user.passwordHash))
-  )
+  ) {
+    if (user?.roles.length) {
+      const threshold = Math.max(
+        3,
+        Number(process.env.STAFF_LOGIN_MAX_ATTEMPTS ?? 8),
+      );
+      const lockMinutes = Math.max(
+        1,
+        Number(process.env.STAFF_LOGIN_LOCK_MINUTES ?? 15),
+      );
+      const failures = user.failedLoginCount + 1;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginCount: failures,
+          lockedUntil:
+            failures >= threshold
+              ? new Date(Date.now() + lockMinutes * 60_000)
+              : user.lockedUntil,
+        },
+      });
+      await audit({
+        userId: user.id,
+        action: "login.failed",
+        entity: "User",
+        entityId: user.id,
+        metadata: { reason: "invalid-credentials-or-status" },
+      });
+    }
     redirect("/login?error=Invalid email or password");
+  }
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { failedLoginCount: 0, lockedUntil: null },
+  });
   await createSession(user.id);
   await mergeGuestCart(user.id);
   await audit({
@@ -95,6 +133,8 @@ export async function changePasswordAction(formData: FormData) {
       forcePasswordChange: false,
     },
   });
+  await prisma.session.deleteMany({ where: { userId: user.id } });
+  await createSession(user.id);
   await audit({
     userId: user.id,
     action: "password.change",

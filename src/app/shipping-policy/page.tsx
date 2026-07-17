@@ -1,2 +1,4 @@
 import { SimplePage } from "@/components/simple-page";
-export default function Page() { return <SimplePage title="Shipping Policy" />; }
+export default function Page() {
+  return <SimplePage title="Shipping Policy" legalReview />;
+}

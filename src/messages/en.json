@@ -1,0 +1,7 @@
+{
+  "global": { "language": "Language", "english": "English", "bangla": "বাংলা", "search": "Search", "account": "Account", "wishlist": "Wishlist", "cart": "Cart", "notifications": "Notifications", "allCategories": "All categories" },
+  "storefront": { "shop": "Shop", "addToCart": "Add to cart", "checkout": "Checkout", "delivery": "Delivery", "reviews": "Reviews", "orderConfirmed": "Order confirmed" },
+  "account": { "dashboard": "Dashboard", "orders": "Orders", "addresses": "Addresses", "returns": "Returns", "support": "Support", "profile": "Profile", "security": "Security" },
+  "auth": { "login": "Log in", "register": "Create account", "forgotPassword": "Forgot password", "resetPassword": "Reset password" },
+  "states": { "loading": "Loading…", "empty": "Nothing here yet.", "error": "Something went wrong.", "success": "Saved successfully." }
+}

@@ -72,7 +72,25 @@ describe("static regressions", () => {
     expect(deploymentChecklist).toContain(
       "Production PostgreSQL database created",
     );
-    expect(liveTestPlan.toLowerCase()).toContain("duplicate sslcommerz callback");
+    expect(liveTestPlan.toLowerCase()).toContain(
+      "duplicate sslcommerz callback",
+    );
     expect(migration).toContain('"courierOrderId"');
+  });
+
+  it("keeps launch security controls in place", () => {
+    const security = readFileSync("src/server/security.ts", "utf8");
+    const auth = readFileSync("src/app/actions/auth.ts", "utf8");
+    const storage = readFileSync("src/server/storage.ts", "utf8");
+    const schema = readFileSync("prisma/schema.prisma", "utf8");
+    expect(security).toContain("httpOnly: true");
+    expect(security).toContain('sameSite: "lax"');
+    expect(security).toContain('process.env.NODE_ENV === "production"');
+    expect(auth).toContain("prisma.session.deleteMany");
+    expect(auth).toContain('action: "login.failed"');
+    expect(storage).toContain("Local file storage is disabled in production");
+    expect(storage).toContain("Invalid protected file key");
+    expect(schema).toContain("@@index([paymentStatus, createdAt])");
+    expect(schema).toContain("@@index([entity, entityId, createdAt])");
   });
 });

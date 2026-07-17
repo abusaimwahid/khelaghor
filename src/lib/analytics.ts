@@ -7,11 +7,18 @@ export type AnalyticsEvent =
   | "coupon_use"
   | "registration";
 
+const emittedPurchases = new Set<string>();
+
 export function trackEvent(
   event: AnalyticsEvent,
   payload: Record<string, unknown> = {},
 ) {
   if (typeof window === "undefined") return;
+  if (event === "purchase") {
+    const orderId = typeof payload.orderId === "string" ? payload.orderId : "";
+    if (!orderId || emittedPurchases.has(orderId)) return;
+    emittedPurchases.add(orderId);
+  }
   window.dispatchEvent(
     new CustomEvent("khelaghor:analytics", { detail: { event, payload } }),
   );

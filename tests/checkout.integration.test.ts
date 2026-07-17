@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { createOrderFromCart } from "@/server/checkout";
@@ -7,8 +7,41 @@ function unique(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+async function ensureTestDeliveryZone() {
+  await prisma.deliveryZone.upsert({
+    where: { slug: "test-dhaka-checkout" },
+    update: {},
+    create: {
+      name: "Test Dhaka Checkout",
+      slug: "test-dhaka-checkout",
+      deliveryFee: 60,
+      minDeliveryDays: 1,
+      maxDeliveryDays: 2,
+      codAvailable: true,
+      expressAvailable: true,
+      expressFee: 120,
+      sortOrder: -100,
+      rules: {
+        create: {
+          divisionId: "dhaka",
+          districtId: "dhaka-dhaka",
+          areaId: "dhaka-dhanmondi",
+          priority: 999,
+        },
+      },
+    },
+  });
+}
+
 describe("checkout integration", () => {
+  afterAll(async () => {
+    await prisma.deliveryZone.deleteMany({
+      where: { slug: "test-dhaka-checkout" },
+    });
+  });
+
   it("creates one order per idempotency key and reduces stock once", async () => {
+    await ensureTestDeliveryZone();
     const sku = unique("SKU");
     const product = await prisma.product.create({
       data: {
@@ -25,8 +58,24 @@ describe("checkout integration", () => {
       include: { brand: true, images: true, inventory: true },
     });
     const cart = await prisma.cart.create({
-      data: { guestToken: unique("guest"), items: { create: { productId: product.id, quantity: 2 } } },
-      include: { items: { include: { product: { include: { brand: true, images: { orderBy: { sortOrder: "asc" } }, inventory: true } } }, orderBy: { id: "asc" } } },
+      data: {
+        guestToken: unique("guest"),
+        items: { create: { productId: product.id, quantity: 2 } },
+      },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                brand: true,
+                images: { orderBy: { sortOrder: "asc" } },
+                inventory: true,
+              },
+            },
+          },
+          orderBy: { id: "asc" },
+        },
+      },
     });
     const idempotencyKey = unique("idem");
     const input = {
@@ -35,26 +84,33 @@ describe("checkout integration", () => {
       fullName: "Test Parent",
       phone: "01700000000",
       email: "test@example.com",
-      division: "Dhaka",
-      district: "Dhaka",
-      area: "Dhanmondi",
+      divisionId: "dhaka",
+      districtId: "dhaka-dhaka",
+      areaId: "dhaka-dhanmondi",
       address: "House 1",
-      deliveryMethod: "STANDARD",
+      deliveryMethod: "standard" as const,
       paymentMethod: "COD",
     };
     const first = await createOrderFromCart(input);
     const second = await createOrderFromCart(input);
-    const emptyRetry = await createOrderFromCart({ ...input, cart: { ...cart, items: [] } });
+    const emptyRetry = await createOrderFromCart({
+      ...input,
+      cart: { ...cart, items: [] },
+    });
     expect(second.id).toBe(first.id);
     expect(emptyRetry.id).toBe(first.id);
     expect(await prisma.order.count({ where: { idempotencyKey } })).toBe(1);
-    const updated = await prisma.product.findUniqueOrThrow({ where: { id: product.id }, include: { inventory: true } });
+    const updated = await prisma.product.findUniqueOrThrow({
+      where: { id: product.id },
+      include: { inventory: true },
+    });
     expect(updated.stock).toBe(3);
     expect(updated.inventory?.available).toBe(3);
     expect(await prisma.cartItem.count({ where: { cartId: cart.id } })).toBe(0);
   });
 
   it("does not clear the cart when checkout fails", async () => {
+    await ensureTestDeliveryZone();
     const product = await prisma.product.create({
       data: {
         name: "No Stock Product",
@@ -70,8 +126,24 @@ describe("checkout integration", () => {
       include: { brand: true, images: true, inventory: true },
     });
     const cart = await prisma.cart.create({
-      data: { guestToken: unique("guest"), items: { create: { productId: product.id, quantity: 1 } } },
-      include: { items: { include: { product: { include: { brand: true, images: { orderBy: { sortOrder: "asc" } }, inventory: true } } }, orderBy: { id: "asc" } } },
+      data: {
+        guestToken: unique("guest"),
+        items: { create: { productId: product.id, quantity: 1 } },
+      },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                brand: true,
+                images: { orderBy: { sortOrder: "asc" } },
+                inventory: true,
+              },
+            },
+          },
+          orderBy: { id: "asc" },
+        },
+      },
     });
     await expect(
       createOrderFromCart({
@@ -79,11 +151,11 @@ describe("checkout integration", () => {
         idempotencyKey: unique("idem"),
         fullName: "Test Parent",
         phone: "01700000000",
-        division: "Dhaka",
-        district: "Dhaka",
-        area: "Dhanmondi",
+        divisionId: "dhaka",
+        districtId: "dhaka-dhaka",
+        areaId: "dhaka-dhanmondi",
         address: "House 1",
-        deliveryMethod: "STANDARD",
+        deliveryMethod: "standard",
         paymentMethod: "COD",
       }),
     ).rejects.toThrow();

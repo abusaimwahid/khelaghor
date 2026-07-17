@@ -25,12 +25,47 @@ test("guest adds product to cart and completes COD checkout", async ({
     page.getByRole("heading", { name: /shopping cart/i }),
   ).toBeVisible();
   await page.getByRole("link", { name: /checkout/i }).click();
+  await expect(
+    page.getByRole("heading", { name: /^checkout$/i }),
+  ).toBeVisible();
   await page.getByLabel(/full name/i).fill("Guest Parent");
   await page.getByLabel(/phone number/i).fill("01700000000");
   await page.getByLabel(/email/i).fill("guest@example.com");
-  await page.getByLabel(/division/i).fill("Dhaka");
-  await page.getByLabel(/district/i).fill("Dhaka");
-  await page.getByLabel(/area/i).fill("Dhanmondi");
+  await page.getByRole("combobox", { name: "Division" }).selectOption("dhaka");
+  await page
+    .getByRole("combobox", { name: "District" })
+    .selectOption("dhaka-dhaka");
+  await page
+    .getByRole("combobox", { name: "Area / Thana" })
+    .selectOption("dhaka-dhanmondi");
+  const quoteButton = page.getByRole("button", { name: /calculate delivery/i });
+  if (await quoteButton.isVisible()) await quoteButton.click();
+  await expect(page.getByRole("status")).toContainText("Delivery fee: ৳ 60");
+  await page
+    .getByRole("combobox", { name: "Division" })
+    .selectOption("chattogram");
+  await page
+    .getByRole("combobox", { name: "District" })
+    .selectOption("chattogram-chattogram");
+  await page
+    .getByRole("combobox", { name: "Area / Thana" })
+    .selectOption("chattogram-agrabad");
+  await expect(page.getByRole("status")).toContainText("Delivery fee: ৳ 130");
+  await page.getByRole("combobox", { name: "Division" }).selectOption("dhaka");
+  await page
+    .getByRole("combobox", { name: "District" })
+    .selectOption("dhaka-dhaka");
+  await page
+    .getByRole("combobox", { name: "Area / Thana" })
+    .selectOption("dhaka-dhanmondi");
+  await expect(page.getByRole("status")).toContainText("Delivery fee: ৳ 60");
+  await page.getByPlaceholder("WELCOME10").fill("EXPIRED10");
+  await page.getByRole("button", { name: /apply/i }).click();
+  await expect(page.getByText(/coupon has expired/i)).toBeVisible();
+  await page.getByRole("button", { name: /remove/i }).click();
+  await page.getByPlaceholder("WELCOME10").fill("FREEDELIVERY");
+  await page.getByRole("button", { name: /apply/i }).click();
+  await expect(page.getByText(/coupon applied/i)).toBeVisible();
   await page.getByLabel(/full address/i).fill("House 1, Road 2, Dhanmondi");
   await page.getByLabel(/terms and conditions/i).check();
   await page.getByRole("button", { name: /place order/i }).click();
@@ -43,7 +78,7 @@ test("customer registers and reaches account dashboard", async ({ page }) => {
   await page.getByLabel(/full name/i).fill("Parent User");
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/phone/i).fill("01711111111");
-  await page.getByLabel(/^password/i).fill("Strong123");
+  await page.getByLabel(/^password/i).fill("StrongLaunch123!");
   await page.getByRole("button", { name: /create account/i }).click();
   await expect(
     page.getByRole("heading", { name: /parent user/i }),

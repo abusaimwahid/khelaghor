@@ -1,4 +1,5 @@
 import { getEnv, getSiteUrl } from "@/server/env";
+import { prisma } from "@/server/db";
 
 export type EmailTemplate =
   | "registration"
@@ -8,7 +9,9 @@ export type EmailTemplate =
   | "order-delivered"
   | "password-reset"
   | "return-update"
-  | "support-reply";
+  | "support-reply"
+  | "review-moderation"
+  | "refund-update";
 
 export type EmailInput = {
   to: string;
@@ -48,6 +51,24 @@ export async function sendEmail(input: EmailInput) {
   const rendered = renderEmail(input);
   if (env.EMAIL_PROVIDER === "dev") {
     console.info("[dev-email]", input.to, input.subject, rendered.plain);
+    await prisma.developmentEmailLog
+      .create({
+        data: {
+          recipient: input.to,
+          subject: input.subject,
+          template: input.template,
+          relatedType:
+            typeof input.data.relatedType === "string"
+              ? input.data.relatedType
+              : undefined,
+          relatedId:
+            typeof input.data.relatedId === "string"
+              ? input.data.relatedId
+              : undefined,
+          preview: rendered.plain.slice(0, 4000),
+        },
+      })
+      .catch(() => undefined);
     return { provider: "dev", sent: false };
   }
   if (env.EMAIL_PROVIDER === "resend") {

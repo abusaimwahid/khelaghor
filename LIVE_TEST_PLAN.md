@@ -1,5 +1,15 @@
 # KhelaGhor Live Test Plan
 
+## Phase 4 evidence
+
+- Record build SHA, environment, operator, timestamp and migration state.
+- Exercise each staff role with allowed/denied pages and mutations; verify deactivation and session revocation.
+- Verify cross-customer order, invoice, support, review, return, notification and private-file IDs disclose nothing.
+- Test unsafe MIME/extension, oversized upload, traversal key, private delivery and production-local-storage rejection.
+- Test invalid coupon, changed stock, duplicate checkout, failed providers and repeated callbacks.
+- Export reconciliation before and after rehearsal and explain each finding.
+- Restore the rehearsal backup in isolation and re-run health and reconciliation.
+
 Run this plan on preview first, then production after DNS and SSL are active.
 
 ## Customer Tests
