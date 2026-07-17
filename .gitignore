@@ -44,3 +44,4 @@ test-results/
 # local development uploads
 /public/uploads/
 /.protected-uploads/
+.env.staging.runtime
