@@ -99,12 +99,15 @@ For quick local prototyping only, `npm run db:push` is still available. For shar
 
 ## Admin Login
 
-The seed script creates a development Super Admin from:
+With local development settings, the seed script creates a development Super Admin from:
 
 - `SEED_ADMIN_EMAIL`
 - `SEED_ADMIN_PASSWORD`
 
-Do not use the example password in production.
+With `APP_ENV=staging`, the seed is synthetic-data-only and never creates an
+administrator or the development password. Staging and production administrators
+must be created separately with `npm run admin:create`. Production seed execution
+never creates development credentials.
 
 For production, create the first admin explicitly after migrations:
 

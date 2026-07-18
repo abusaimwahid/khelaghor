@@ -97,7 +97,7 @@ export async function Header() {
         </div>
         <form
           action="/search"
-          className="hidden h-12 min-w-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[#f8fafc] shadow-inner transition focus-within:border-coral focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(255,92,117,.1)] md:flex"
+          className="hidden h-12 min-w-0 overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-soft)] transition focus-within:border-coral focus-within:bg-white focus-within:shadow-[0_0_0_3px_rgba(255,92,117,.1)] md:flex"
         >
           <select
             name="category"
@@ -136,7 +136,7 @@ export async function Header() {
           </Link>
           <Link
             href={user ? "/account" : "/login"}
-            className="focus-ring hidden h-11 items-center gap-2 rounded-md px-3 font-black text-navy md:inline-flex"
+            className="focus-ring hidden h-11 items-center gap-2 rounded-xl px-3 font-black text-navy transition hover:bg-[var(--surface-soft)] md:inline-flex"
           >
             <UserRound className="h-5 w-5" />
             {user?.name?.split(" ")[0] ?? t.global.account}
@@ -249,8 +249,8 @@ function CountLink({
       href={href}
       className={
         dark
-          ? "focus-ring relative grid h-11 w-11 place-items-center rounded-md bg-navy text-white"
-          : "focus-ring relative grid h-11 w-11 place-items-center rounded-md border border-[var(--border)] text-navy"
+          ? "focus-ring relative grid h-11 w-11 place-items-center rounded-xl bg-navy text-white shadow-sm transition hover:-translate-y-0.5"
+          : "focus-ring relative grid h-11 w-11 place-items-center rounded-xl border border-[var(--border)] bg-white text-navy transition hover:border-coral hover:bg-[var(--surface-soft)]"
       }
       aria-label={`${label}${count ? `, ${count} items` : ""}`}
     >

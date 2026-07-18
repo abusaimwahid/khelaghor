@@ -1,5 +1,14 @@
 # KhelaGhor Project Status
 
+## Password flow and shared UI hardening (July 18, 2026)
+
+- Root cause isolated: bootstrap accepted length-only temporary passwords while password change enforced mixed complexity, and the action collapsed validation, current-password and reuse failures into one generic error.
+- Unified bootstrap, registration and password-change policy at 12+ characters with uppercase, lowercase, number and symbol requirements. Password changes now return safe error codes, reject reuse, clear `forcePasswordChange`, revoke old sessions and create one replacement session.
+- Added accessible show/hide controls, live password requirements, field-specific guidance and a softer responsive security card. Extended the same password-field treatment to shared authentication pages.
+- Expanded the existing design system with surface, text, semantic color, radius, shadow, spacing, type and transition tokens; refined shared storefront controls, header actions and restrained admin surfaces without changing commerce calculations or backend queries.
+- Local PostgreSQL verification passed with all 12 migrations current: ESLint, TypeScript, 15 Vitest files / 62 tests, 5/5 Playwright workflows including complete forced-password rotation, and the production build with 46 generated static pages plus dynamic routes.
+- Staging was not modified or deployed. The temporary administrator credential visible in supplied evidence must be rotated before staging authentication verification. Neon rotation remains unconfirmed, so the decision remains **NO-GO**.
+
 ## Staging provisioning continuation retry (July 18, 2026)
 
 - Reconfirmed branch `staging` at preflight commit `23cb745`, staging-only local Vercel link and secret-file hygiene.

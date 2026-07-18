@@ -1,9 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { execFileSync } from "node:child_process";
-
-test.beforeAll(() => {
-  execFileSync("npm", ["run", "db:seed"], { stdio: "inherit" });
-});
 
 test("customer browses a category and opens a database product", async ({
   page,
@@ -88,7 +83,7 @@ test("customer registers and reaches account dashboard", async ({ page }) => {
 test("admin logs in and views protected dashboard", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel(/email/i).fill("admin@khelaghor.local");
-  await page.getByLabel(/password/i).fill("ChangeMe123!");
+  await page.locator('input[name="password"]').fill("ChangeMe123!");
   await page.getByRole("button", { name: /^login$/i }).click();
   await expect(
     page.getByRole("heading", { name: /operations dashboard/i }),

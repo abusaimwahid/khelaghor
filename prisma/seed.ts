@@ -1,15 +1,18 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "node:crypto";
 import { brands, categories, coupons, products } from "../src/data/catalog";
 import { allDistrictIdsExcept } from "../src/data/bangladesh-locations";
 import {
   defaultHomepageSettings,
   defaultSiteSettings,
 } from "../src/server/site-settings";
+import { resolveSeedPolicy } from "./seed-policy";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const policy = resolveSeedPolicy(process.env);
   const permissions = [
     "*",
     "products.view",
@@ -42,135 +45,141 @@ async function main() {
     "courier.manage",
     "audit.view",
   ];
-  for (const key of permissions)
-    await prisma.permission.upsert({
-      where: { key },
-      update: {},
-      create: { key },
-    });
-  const role = await prisma.role.upsert({
-    where: { name: "Super Admin" },
-    update: {},
-    create: { name: "Super Admin", description: "Full platform access" },
-  });
-  const all = await prisma.permission.findMany();
-  for (const permission of all)
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: { roleId: role.id, permissionId: permission.id },
-      },
-      update: {},
-      create: { roleId: role.id, permissionId: permission.id },
-    });
-
-  const roleMatrix: Record<string, string[]> = {
-    "Store Manager": [
-      "dashboard.metrics",
-      "products.view",
-      "orders.view",
-      "orders.update",
-      "inventory.view",
-      "customers.view",
-      "reports.view",
-      "coupons.manage",
-      "returns.review",
-      "support.manage",
-      "reviews.moderate",
-    ],
-    "Product Manager": [
-      "products.view",
-      "products.create",
-      "products.update",
-      "products.images.manage",
-      "products.variants.manage",
-      "categories.manage",
-      "brands.manage",
-      "inventory.view",
-    ],
-    "Order Manager": [
-      "orders.view",
-      "orders.update",
-      "orders.payment.verify",
-      "returns.review",
-      "courier.manage",
-      "customers.view",
-    ],
-    "Warehouse Staff": [
-      "products.view",
-      "inventory.view",
-      "inventory.adjust",
-      "orders.view",
-      "orders.update",
-      "returns.review",
-    ],
-    "Customer Support": [
-      "orders.view",
-      "customers.view",
-      "returns.review",
-      "support.manage",
-      "support.internal-notes",
-      "reviews.moderate",
-    ],
-    "Content Manager": [
-      "products.view",
-      "homepage.manage",
-      "content.manage",
-      "reviews.moderate",
-    ],
-    Accountant: [
-      "dashboard.metrics",
-      "orders.view",
-      "orders.payment.verify",
-      "refunds.approve",
-      "reports.view",
-      "audit.view",
-    ],
-  };
-  for (const [name, keys] of Object.entries(roleMatrix)) {
-    const seededRole = await prisma.role.upsert({
-      where: { name },
-      update: {},
-      create: { name, description: `${name} operational access` },
-    });
-    await prisma.rolePermission.deleteMany({
-      where: { roleId: seededRole.id },
-    });
-    const assigned = all.filter((permission) => keys.includes(permission.key));
-    if (assigned.length)
-      await prisma.rolePermission.createMany({
-        data: assigned.map((permission) => ({
-          roleId: seededRole.id,
-          permissionId: permission.id,
-        })),
+  if (policy.seedOperationalAccess) {
+    for (const key of permissions)
+      await prisma.permission.upsert({
+        where: { key },
+        update: {},
+        create: { key },
       });
-  }
+    const role = await prisma.role.upsert({
+      where: { name: "Super Admin" },
+      update: {},
+      create: { name: "Super Admin", description: "Full platform access" },
+    });
+    const all = await prisma.permission.findMany();
+    for (const permission of all)
+      await prisma.rolePermission.upsert({
+        where: {
+          roleId_permissionId: { roleId: role.id, permissionId: permission.id },
+        },
+        update: {},
+        create: { roleId: role.id, permissionId: permission.id },
+      });
 
-  const shouldSeedAdmin =
-    process.env.NODE_ENV !== "production" ||
-    process.env.CREATE_SEED_ADMIN === "true";
-  if (shouldSeedAdmin) {
-    const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@khelaghor.local";
-    const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!";
-    const admin = await prisma.user.upsert({
-      where: { email: adminEmail },
-      update: {},
-      create: {
-        email: adminEmail,
-        name: "Development Super Admin",
-        passwordHash: await bcrypt.hash(adminPassword, 12),
-        phone: "+8801000000000",
-        forcePasswordChange: process.env.NODE_ENV === "production",
-      },
-    });
-    await prisma.userRole.upsert({
-      where: { userId_roleId: { userId: admin.id, roleId: role.id } },
-      update: {},
-      create: { userId: admin.id, roleId: role.id },
-    });
-    console.log(`Seed complete. Admin: ${adminEmail} / ${adminPassword}`);
+    const roleMatrix: Record<string, string[]> = {
+      "Store Manager": [
+        "dashboard.metrics",
+        "products.view",
+        "orders.view",
+        "orders.update",
+        "inventory.view",
+        "customers.view",
+        "reports.view",
+        "coupons.manage",
+        "returns.review",
+        "support.manage",
+        "reviews.moderate",
+      ],
+      "Product Manager": [
+        "products.view",
+        "products.create",
+        "products.update",
+        "products.images.manage",
+        "products.variants.manage",
+        "categories.manage",
+        "brands.manage",
+        "inventory.view",
+      ],
+      "Order Manager": [
+        "orders.view",
+        "orders.update",
+        "orders.payment.verify",
+        "returns.review",
+        "courier.manage",
+        "customers.view",
+      ],
+      "Warehouse Staff": [
+        "products.view",
+        "inventory.view",
+        "inventory.adjust",
+        "orders.view",
+        "orders.update",
+        "returns.review",
+      ],
+      "Customer Support": [
+        "orders.view",
+        "customers.view",
+        "returns.review",
+        "support.manage",
+        "support.internal-notes",
+        "reviews.moderate",
+      ],
+      "Content Manager": [
+        "products.view",
+        "homepage.manage",
+        "content.manage",
+        "reviews.moderate",
+      ],
+      Accountant: [
+        "dashboard.metrics",
+        "orders.view",
+        "orders.payment.verify",
+        "refunds.approve",
+        "reports.view",
+        "audit.view",
+      ],
+    };
+    for (const [name, keys] of Object.entries(roleMatrix)) {
+      const seededRole = await prisma.role.upsert({
+        where: { name },
+        update: {},
+        create: { name, description: `${name} operational access` },
+      });
+      await prisma.rolePermission.deleteMany({
+        where: { roleId: seededRole.id },
+      });
+      const assigned = all.filter((permission) =>
+        keys.includes(permission.key),
+      );
+      if (assigned.length)
+        await prisma.rolePermission.createMany({
+          data: assigned.map((permission) => ({
+            roleId: seededRole.id,
+            permissionId: permission.id,
+          })),
+        });
+    }
+
+    if (policy.seedDevelopmentAdmin) {
+      const adminEmail =
+        process.env.SEED_ADMIN_EMAIL ?? "admin@khelaghor.local";
+      const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!";
+      const admin = await prisma.user.upsert({
+        where: { email: adminEmail },
+        update: {},
+        create: {
+          email: adminEmail,
+          name: "Development Super Admin",
+          passwordHash: await bcrypt.hash(adminPassword, 12),
+          phone: "+8801000000000",
+          forcePasswordChange: process.env.NODE_ENV === "production",
+        },
+      });
+      await prisma.userRole.upsert({
+        where: { userId_roleId: { userId: admin.id, roleId: role.id } },
+        update: {},
+        create: { userId: admin.id, roleId: role.id },
+      });
+      console.log(`Seed complete. Development admin: ${adminEmail}`);
+    } else {
+      console.log(
+        "Seed admin skipped. Run npm run admin:create with explicit credentials.",
+      );
+    }
   } else {
     console.log(
-      "Seed complete. Production admin seeding skipped. Run npm run admin:create with explicit credentials.",
+      "Staging operational access and admin seeding skipped. Run npm run admin:create separately.",
     );
   }
 
@@ -309,39 +318,42 @@ async function main() {
         active: true,
       },
     });
-  await prisma.siteSetting.upsert({
-    where: { key: "store" },
-    update: {},
-    create: {
-      key: "store",
-      value: {
-        brand: "KhelaGhor",
-        currency: "BDT",
-        freeDeliveryThreshold: 3000,
+  if (policy.seedSiteSettings)
+    await prisma.siteSetting.upsert({
+      where: { key: "store" },
+      update: {},
+      create: {
+        key: "store",
+        value: {
+          brand: "KhelaGhor",
+          currency: "BDT",
+          freeDeliveryThreshold: 3000,
+        },
       },
-    },
-  });
-  await prisma.siteSetting.upsert({
-    where: { key: "site" },
-    update: {},
-    create: {
-      key: "site",
-      value: defaultSiteSettings,
-    },
-  });
-  await prisma.siteSetting.upsert({
-    where: { key: "homepage" },
-    update: {},
-    create: {
-      key: "homepage",
-      value: defaultHomepageSettings,
-    },
-  });
-  await seedDeliveryZones();
-  await seedCustomerTrustWorkflows();
+    });
+  if (policy.seedSiteSettings)
+    await prisma.siteSetting.upsert({
+      where: { key: "site" },
+      update: {},
+      create: {
+        key: "site",
+        value: defaultSiteSettings,
+      },
+    });
+  if (policy.seedSiteSettings)
+    await prisma.siteSetting.upsert({
+      where: { key: "homepage" },
+      update: {},
+      create: {
+        key: "homepage",
+        value: defaultHomepageSettings,
+      },
+    });
+  await seedDeliveryZones(policy);
+  await seedCustomerTrustWorkflows(policy);
 }
 
-async function seedDeliveryZones() {
+async function seedDeliveryZones(policy: ReturnType<typeof resolveSeedPolicy>) {
   const seededZoneIds: string[] = [];
   const createIfMissing = async (
     slug: string,
@@ -500,7 +512,7 @@ async function seedDeliveryZones() {
       create: [{ divisionId: "dhaka", districtId: "dhaka-dhaka", priority: 1 }],
     },
   });
-  if (seededZoneIds.length > 0)
+  if (policy.environment !== "staging" && seededZoneIds.length > 0)
     await prisma.auditLog.create({
       data: {
         action: "delivery-zone.seed",
@@ -511,7 +523,13 @@ async function seedDeliveryZones() {
     });
 }
 
-async function seedCustomerTrustWorkflows() {
+async function seedCustomerTrustWorkflows(
+  policy: ReturnType<typeof resolveSeedPolicy>,
+) {
+  const customerPassword =
+    policy.environment === "development"
+      ? "ChangeMe123!"
+      : randomBytes(32).toString("base64url");
   const customer = await prisma.user.upsert({
     where: { email: "parent@khelaghor.local" },
     update: {},
@@ -519,7 +537,7 @@ async function seedCustomerTrustWorkflows() {
       email: "parent@khelaghor.local",
       name: "Seed Parent",
       phone: "+8801711111111",
-      passwordHash: await bcrypt.hash("ChangeMe123!", 12),
+      passwordHash: await bcrypt.hash(customerPassword, 12),
     },
   });
   const product = await prisma.product.findFirstOrThrow({
@@ -725,38 +743,65 @@ async function seedCustomerTrustWorkflows() {
       },
     },
   });
-  await prisma.notification.create({
-    data: {
+  const customerNotification = await prisma.notification.findFirst({
+    where: {
       userId: customer.id,
       type: "COUPON_ISSUED",
-      title: "Coupon issued",
-      body: "Try FREEDELIVERY on your next eligible order.",
       resourceType: "Coupon",
       resourceId: "FREEDELIVERY",
-      href: "/checkout",
     },
   });
-  await prisma.notification.create({
-    data: {
+  if (!customerNotification)
+    await prisma.notification.create({
+      data: {
+        userId: customer.id,
+        type: "COUPON_ISSUED",
+        title: "Coupon issued",
+        body: "Try FREEDELIVERY on your next eligible order.",
+        resourceType: "Coupon",
+        resourceId: "FREEDELIVERY",
+        href: "/checkout",
+      },
+    });
+  const adminNotification = await prisma.notification.findFirst({
+    where: {
+      userId: null,
       type: "ADMIN_SUPPORT_TICKET",
-      title: "New support ticket",
-      body: ticket.subject,
       resourceType: "SupportTicket",
       resourceId: ticket.id,
-      href: `/admin/support/${ticket.id}`,
     },
   });
-  if (process.env.NODE_ENV !== "production") {
-    await prisma.developmentEmailLog.create({
+  if (!adminNotification)
+    await prisma.notification.create({
       data: {
+        type: "ADMIN_SUPPORT_TICKET",
+        title: "New support ticket",
+        body: ticket.subject,
+        resourceType: "SupportTicket",
+        resourceId: ticket.id,
+        href: `/admin/support/${ticket.id}`,
+      },
+    });
+  if (policy.seedDevelopmentEmail) {
+    const emailLog = await prisma.developmentEmailLog.findFirst({
+      where: {
         recipient: customer.email,
-        subject: "Seed workflow email",
         template: "support-reply",
         relatedType: "SupportTicket",
         relatedId: ticket.id,
-        preview: "Seed development email preview.",
       },
     });
+    if (!emailLog)
+      await prisma.developmentEmailLog.create({
+        data: {
+          recipient: customer.email,
+          subject: "Seed workflow email",
+          template: "support-reply",
+          relatedType: "SupportTicket",
+          relatedId: ticket.id,
+          preview: "Seed development email preview.",
+        },
+      });
   }
 }
 

@@ -1,5 +1,5 @@
 import { ProductStatus } from "@prisma/client";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   findLocationByIds,
   getAreasByDistrict,
@@ -10,6 +10,7 @@ import {
 import { createOrderFromCart } from "@/server/checkout";
 import { DeliveryError, quoteDelivery } from "@/server/delivery";
 import { prisma } from "@/server/db";
+import { resetAndBootstrapTestDatabase } from "./cleanup";
 
 function unique(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -27,6 +28,7 @@ async function resetTestZones() {
 }
 
 describe("Bangladesh delivery", () => {
+  beforeAll(resetAndBootstrapTestDatabase);
   beforeEach(async () => {
     await resetTestZones();
   });

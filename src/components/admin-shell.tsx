@@ -86,7 +86,7 @@ const groups = [
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   return (
-    <div className="admin-ui min-h-screen bg-[#f4f6f9]">
+    <div className="admin-ui min-h-screen bg-[#f5f7fa]">
       <div className="sticky top-0 z-30 border-b border-[#e3e8ef] bg-white/95 backdrop-blur-xl">
         <div className="flex h-16 items-center gap-3 px-4 lg:pl-[292px] lg:pr-6">
           <details className="relative lg:hidden">
@@ -96,7 +96,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             >
               <Menu className="h-5 w-5" />
             </summary>
-            <div className="fixed inset-x-3 top-16 max-h-[calc(100vh-5rem)] overflow-auto rounded-xl bg-navy p-4 text-white shadow-2xl">
+            <div className="fixed inset-x-3 top-16 max-h-[calc(100vh-5rem)] overflow-auto rounded-[16px] bg-navy p-4 text-white shadow-2xl">
               <AdminNavigation pathname={pathname} />
             </div>
           </details>
@@ -133,7 +133,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </div>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col bg-[#0d2345] text-white shadow-xl lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[272px] flex-col bg-[#10264a] text-white shadow-xl lg:flex">
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
           <Logo variant="light" />
           <ShieldCheck className="h-5 w-5 text-sun" />
@@ -146,7 +146,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <main className="min-w-0 p-4 sm:p-6 lg:ml-[272px] lg:p-8">
-        {" "}
         <div className="mx-auto max-w-[1500px] space-y-6">{children}</div>
       </main>
     </div>

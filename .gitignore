@@ -45,3 +45,8 @@ test-results/
 /public/uploads/
 /.protected-uploads/
 .env.staging.runtime
+
+# Local AI agent configuration
+.agents/
+.claude/
+skills-lock.json

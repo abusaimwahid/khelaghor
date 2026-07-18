@@ -1,7 +1,8 @@
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { createOrderFromCart } from "@/server/checkout";
+import { resetAndBootstrapTestDatabase } from "./cleanup";
 
 function unique(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -34,6 +35,7 @@ async function ensureTestDeliveryZone() {
 }
 
 describe("checkout integration", () => {
+  beforeAll(resetAndBootstrapTestDatabase);
   afterAll(async () => {
     await prisma.deliveryZone.deleteMany({
       where: { slug: "test-dhaka-checkout" },

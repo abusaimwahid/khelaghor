@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { strongPasswordSchema } from "./password-policy";
 
 export const registerSchema = z.object({
   name: z.string().min(2),
@@ -7,13 +8,7 @@ export const registerSchema = z.object({
     .email()
     .transform((v) => v.toLowerCase()),
   phone: z.string().min(8),
-  password: z
-    .string()
-    .min(12)
-    .regex(/[a-z]/, "Password requires a lowercase letter")
-    .regex(/[A-Z]/, "Password requires an uppercase letter")
-    .regex(/[0-9]/, "Password requires a number")
-    .regex(/[^A-Za-z0-9]/, "Password requires a symbol"),
+  password: strongPasswordSchema,
 });
 
 export const loginSchema = z.object({
@@ -27,13 +22,7 @@ export const loginSchema = z.object({
 export const passwordChangeSchema = z
   .object({
     currentPassword: z.string().min(1),
-    newPassword: z
-      .string()
-      .min(12)
-      .regex(/[a-z]/)
-      .regex(/[A-Z]/)
-      .regex(/[0-9]/)
-      .regex(/[^A-Za-z0-9]/),
+    newPassword: strongPasswordSchema,
     confirmPassword: z.string().min(12),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

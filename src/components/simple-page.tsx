@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Heart, ShieldCheck, Sparkles } from "lucide-react";
 import { loginAction, registerAction } from "@/app/actions/auth";
+import { AuthPasswordField } from "@/components/forms/auth-password-field";
 
 export function SimplePage({
   title,
@@ -61,8 +62,8 @@ export function AuthForm({
         ? registerAction
         : undefined;
   return (
-    <section className="container grid min-h-[680px] items-center gap-8 py-10 lg:grid-cols-[1fr_480px]">
-      <div className="hidden min-h-[560px] overflow-hidden rounded-[24px] bg-gradient-to-br from-navy via-[#153963] to-teal p-12 text-white shadow-2xl lg:flex lg:flex-col lg:justify-between">
+    <section className="container grid min-h-[680px] items-center gap-8 py-10 lg:grid-cols-[1fr_480px] lg:py-14">
+      <div className="hidden min-h-[560px] overflow-hidden rounded-[24px] bg-gradient-to-br from-navy via-[#153963] to-teal p-12 text-white shadow-[var(--shadow-lg)] lg:flex lg:flex-col lg:justify-between">
         <Sparkles className="h-12 w-12 text-sun" />
         <div>
           <p className="text-sm font-black uppercase tracking-[.2em] text-sun">
@@ -81,7 +82,10 @@ export function AuthForm({
           </div>
         </div>
       </div>
-      <form action={action} className="storefront-surface w-full p-7 md:p-10">
+      <form
+        action={action}
+        className="storefront-surface w-full rounded-[24px] p-7 md:p-10"
+      >
         <p className="storefront-eyebrow">Welcome to KhelaGhor</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight text-navy">
           {title}
@@ -113,21 +117,20 @@ export function AuthForm({
           </label>
         ) : null}
         {mode !== "forgot" ? (
-          <label className="mt-5 block font-bold text-navy">
-            Password
-            <input
-              name="password"
-              type="password"
-              className="kg-input mt-2"
-              required
-            />
-          </label>
+          <AuthPasswordField
+            autoComplete={
+              mode === "login" ? "current-password" : "new-password"
+            }
+            minLength={mode === "login" ? undefined : 12}
+          />
         ) : null}
         {mode === "reset" ? (
-          <label className="mt-5 block font-bold text-navy">
-            Confirm password
-            <input type="password" className="kg-input mt-2" required />
-          </label>
+          <AuthPasswordField
+            label="Confirm password"
+            name="confirmPassword"
+            autoComplete="new-password"
+            minLength={12}
+          />
         ) : null}
         <button className="kg-button kg-button-primary mt-7 w-full">
           {title}

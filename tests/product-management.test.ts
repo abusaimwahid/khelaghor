@@ -1,13 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { ProductStatus } from "@prisma/client";
 import { prisma } from "@/server/db";
 import { productSchema } from "@/server/validation";
+import { resetAndBootstrapTestDatabase } from "./cleanup";
 
 function unique(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 describe("product management", () => {
+  beforeAll(resetAndBootstrapTestDatabase);
   it("rejects sale prices above regular price", () => {
     const parsed = productSchema.safeParse({
       name: "Wooden Puzzle",

@@ -9,14 +9,15 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/server/security";
-import {
-  loginSchema,
-  passwordChangeSchema,
-  registerSchema,
-} from "@/server/validation";
+import { loginSchema, registerSchema } from "@/server/validation";
 import { mergeGuestCart } from "@/server/cart";
 import { audit } from "@/server/notify";
 import { requireUser } from "@/server/security";
+import {
+  changePasswordForUser,
+  parsePasswordChangeInput,
+  PasswordChangeError,
+} from "@/server/password-change";
 
 export async function registerAction(formData: FormData) {
   await assertRateLimit("register", 5);
@@ -118,28 +119,35 @@ export async function logoutAction() {
 export async function changePasswordAction(formData: FormData) {
   await assertRateLimit("change-password", 5);
   const user = await requireUser();
-  const parsed = passwordChangeSchema.safeParse(Object.fromEntries(formData));
-  if (
-    !parsed.success ||
-    !user.passwordHash ||
-    !(await verifyPassword(parsed.data.currentPassword, user.passwordHash))
-  ) {
-    redirect("/account/security?error=Invalid password details");
+  let input;
+  try {
+    input = parsePasswordChangeInput(Object.fromEntries(formData));
+    await changePasswordForUser(user, input, {
+      verify: verifyPassword,
+      hash: hashPassword,
+      updatePassword: async (userId, passwordHash) => {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { passwordHash, forcePasswordChange: false },
+        });
+      },
+      revokeSessions: async (userId) => {
+        await prisma.session.deleteMany({ where: { userId } });
+      },
+      createSession,
+      recordAudit: async (userId) => {
+        await audit({
+          userId,
+          action: "password.change",
+          entity: "User",
+          entityId: userId,
+        });
+      },
+    });
+  } catch (error) {
+    if (error instanceof PasswordChangeError)
+      redirect(`/account/security?error=${error.code}`);
+    throw error;
   }
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      passwordHash: await hashPassword(parsed.data.newPassword),
-      forcePasswordChange: false,
-    },
-  });
-  await prisma.session.deleteMany({ where: { userId: user.id } });
-  await createSession(user.id);
-  await audit({
-    userId: user.id,
-    action: "password.change",
-    entity: "User",
-    entityId: user.id,
-  });
   redirect(user.roles.length ? "/admin" : "/account");
 }

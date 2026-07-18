@@ -1,7 +1,8 @@
 import { ProductStatus } from "@prisma/client";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { adjustInventory } from "@/server/inventory";
 import { prisma } from "@/server/db";
+import { resetAndBootstrapTestDatabase } from "./cleanup";
 
 function unique(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -25,6 +26,7 @@ async function createInventoryProduct(stock = 5) {
 }
 
 describe("core operations", () => {
+  beforeAll(resetAndBootstrapTestDatabase);
   it("records stock increases with previous and new quantity", async () => {
     const product = await createInventoryProduct(4);
     const movement = await adjustInventory({

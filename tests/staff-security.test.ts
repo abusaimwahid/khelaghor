@@ -1,12 +1,14 @@
 import { UserStatus } from "@prisma/client";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/server/db";
 import { createStaff, updateStaff } from "@/server/staff";
+import { resetAndBootstrapTestDatabase } from "./cleanup";
 
 const unique = (prefix: string) =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`;
 
 describe("staff lifecycle guardrails", () => {
+  beforeAll(resetAndBootstrapTestDatabase);
   it("creates staff safely and rejects duplicate email", async () => {
     const actor = await prisma.user.create({
       data: { email: unique("actor") },

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { strongPasswordSchema } from "../src/server/password-policy";
 
 const prisma = new PrismaClient();
 
@@ -7,9 +8,13 @@ async function main() {
   const email = process.env.ADMIN_BOOTSTRAP_EMAIL?.toLowerCase();
   const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
   const name = process.env.ADMIN_BOOTSTRAP_NAME ?? "KhelaGhor Admin";
-  if (!email || !password || password.length < 12) {
+  if (
+    !email ||
+    !password ||
+    !strongPasswordSchema.safeParse(password).success
+  ) {
     throw new Error(
-      "Set ADMIN_BOOTSTRAP_EMAIL and ADMIN_BOOTSTRAP_PASSWORD with at least 12 characters.",
+      "Set ADMIN_BOOTSTRAP_EMAIL and a password with at least 12 characters, uppercase, lowercase, number, and symbol.",
     );
   }
   const permission = await prisma.permission.upsert({

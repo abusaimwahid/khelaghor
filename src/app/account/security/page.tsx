@@ -1,5 +1,4 @@
-import { changePasswordAction } from "@/app/actions/auth";
-import { ErrorState } from "@/components/states";
+import { PasswordChangeForm } from "@/components/forms/password-change-form";
 import { requireUser } from "@/server/security";
 
 export const dynamic = "force-dynamic";
@@ -12,8 +11,8 @@ export default async function AccountSecurityPage({
   const user = await requireUser();
   const params = await searchParams;
   return (
-    <div className="container py-10">
-      <section className="kg-card mx-auto max-w-xl p-6">
+    <div className="container grid min-h-[calc(100vh-12rem)] place-items-center py-10 sm:py-14">
+      <section className="kg-card w-full max-w-xl rounded-[24px] p-6 sm:p-9">
         <p className="text-sm font-black uppercase text-teal">
           Account security
         </p>
@@ -23,48 +22,7 @@ export default async function AccountSecurityPage({
             ? "This account was created through a secure bootstrap flow. Set a new private password before continuing."
             : "Keep your KhelaGhor account protected with a strong password."}
         </p>
-        {params.error ? (
-          <div className="mt-5">
-            <ErrorState
-              title="Password change failed"
-              description={params.error}
-            />
-          </div>
-        ) : null}
-        <form action={changePasswordAction} className="mt-6 space-y-4">
-          <label className="block font-bold text-navy">
-            Current password
-            <input
-              name="currentPassword"
-              type="password"
-              required
-              className="kg-input mt-2"
-            />
-          </label>
-          <label className="block font-bold text-navy">
-            New password
-            <input
-              name="newPassword"
-              type="password"
-              required
-              minLength={12}
-              className="kg-input mt-2"
-            />
-          </label>
-          <label className="block font-bold text-navy">
-            Confirm new password
-            <input
-              name="confirmPassword"
-              type="password"
-              required
-              minLength={12}
-              className="kg-input mt-2"
-            />
-          </label>
-          <button className="kg-button kg-button-primary w-full">
-            Update password
-          </button>
-        </form>
+        <PasswordChangeForm errorCode={params.error} />
       </section>
     </div>
   );
