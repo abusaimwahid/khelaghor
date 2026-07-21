@@ -2,16 +2,20 @@ import { expect, test } from "@playwright/test";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { prisma } from "../src/server/db";
+import { strongPasswordSchema } from "../src/server/password-policy";
 
-const email = `password-flow-${crypto.randomUUID()}@example.test`;
+const email = "password-flow-admin@example.test";
 const temporaryPassword = `Aa1!${crypto.randomUUID()}`;
 const privatePassword = `Bb2@${crypto.randomUUID()}`;
 let userId: string;
 
 test.beforeAll(async () => {
+  strongPasswordSchema.parse(temporaryPassword);
+  strongPasswordSchema.parse(privatePassword);
   const role = await prisma.role.findUniqueOrThrow({
     where: { name: "Super Admin" },
   });
+  await prisma.user.deleteMany({ where: { email } });
   const user = await prisma.user.create({
     data: {
       email,

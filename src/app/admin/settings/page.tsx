@@ -145,9 +145,7 @@ export default async function AdminSettingsPage() {
             />
           </div>
         </section>
-        <button className="rounded-md bg-coral px-6 py-3 font-black text-white">
-          Save Settings
-        </button>
+        <div className="sticky bottom-4 z-20 flex justify-end rounded-xl border border-[var(--border)] bg-white/95 p-3 shadow-lg backdrop-blur"><button className="admin-button admin-button-primary">Save settings</button></div>
       </form>
     </AdminShell>
   );

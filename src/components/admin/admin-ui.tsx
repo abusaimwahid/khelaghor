@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, Inbox } from "lucide-react";
 
 export function AdminStat({
   label,
@@ -63,4 +65,18 @@ export function AdminSection({
       {children}
     </section>
   );
+}
+
+export function AdminEmpty({ title, description, colSpan }: { title: string; description: string; colSpan?: number }) {
+  const content = <div className="admin-empty"><Inbox className="h-6 w-6" /><strong>{title}</strong><p>{description}</p></div>;
+  return colSpan ? <tr><td colSpan={colSpan}>{content}</td></tr> : content;
+}
+
+export function AdminAlert({ children }: { children: ReactNode }) {
+  return <div role="alert" className="admin-alert"><AlertTriangle className="h-5 w-5 shrink-0" /><div>{children}</div></div>;
+}
+
+export function AdminPagination({ page, pages, href }: { page: number; pages: number; href: (page: number) => string }) {
+  if (pages <= 1) return null;
+  return <nav aria-label="Pagination" className="admin-pagination"><p>Page {page} of {pages}</p><div className="flex gap-2"><Link aria-disabled={page <= 1} className="admin-button admin-button-secondary aria-disabled:pointer-events-none aria-disabled:opacity-50" href={href(Math.max(1, page - 1))}>Previous</Link><Link aria-disabled={page >= pages} className="admin-button admin-button-secondary aria-disabled:pointer-events-none aria-disabled:opacity-50" href={href(Math.min(pages, page + 1))}>Next</Link></div></nav>;
 }

@@ -101,6 +101,31 @@ The project owner must review and accept Neon marketplace terms at the verificat
 
 These results validate the local workspace only. They are not evidence of staging database, URL, health or provider success.
 
+## Run 2026-07-18 — staging verification continuation
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Staging login URL | PASS | `https://khelaghor-staging.vercel.app/login` returned HTTP 200 and the KhelaGhor login document. |
+| Staging health | PASS | `/api/health` returned HTTP 200. |
+| Super Admin forced-password rotation | BLOCKED | Interactive browser credentials were not available in this execution context; no password was printed, stored, or guessed. |
+| Temporary password rejection / replacement session | BLOCKED | Dependent on the blocked rotation step; no session state was changed. |
+| Staging customer/admin smoke suites | BLOCKED | Requires authenticated staging sessions and synthetic fixtures; not inferred from local tests. |
+| Environment audit | PASS | `npm run env:audit` passed without printing values. |
+| Deploy environment audit | PASS | `npm run predeploy:audit` passed; runtime env files are ignored and `.env.example` remains allowed. |
+| Authorized staging harness | PASS | Added `npm run test:e2e:staging`; it requires all four `STAGING_TEST_*` variables, fixed staging origin, and disables screenshots/video/traces. Missing credentials correctly refuse execution. |
+| Fixture safety harness | PASS | `staging:fixtures:prepare` and `staging:fixtures:cleanup -- --dry-run` make no changes unless explicit staging mutation support is later added. |
+| Operator safety regression tests | PASS | `tests/staging-operator.test.ts`: 3 tests cover required credentials, fixed origin/unsafe target rejection, paired mutation opt-ins, disabled evidence capture, and absence of local web-server startup. |
+| Full local verification | PASS | Environment audits, local DB check, 12-migration status, lint, typecheck, 66 Vitest tests, 7 Playwright tests, and production build all passed. Local Prisma CLI now reads localhost `.env` explicitly; no hosted credential was added. |
+| Environment file protection | PASS | `.env` and `.env.local` are ignored and untracked; `.env.example` now uses placeholders only. No runtime env files are tracked. |
+| Page-level visual refinement | PASS | Refined shared header controls, responsive search surface, homepage hero, section headings, category cards and CTA buttons using the existing token system; backend and route behavior unchanged. |
+| Product/shop visual refinement | PASS | Product cards now use tokenized card/image surfaces, category metadata, consistent square framing and responsive spacing; shop filter panels and product grid use the shared panel/card system. Static regressions, typecheck and lint pass. |
+| Category/product detail refinement | PASS | Category hero, child-category cards, guide panels and product gallery/detail surfaces now use the shared premium radius, border, shadow and responsive spacing tokens. Routing, metadata, reviews, variants and cart validation are unchanged. |
+| Brand/cart refinement | PASS | Brand index/detail pages now have premium collection headers, responsive brand cards and breadcrumbs; cart item and summary panels now use shared soft surfaces and responsive spacing. Queries, totals and cart actions are unchanged. |
+| Checkout visual refinement | PASS | Checkout form, terms panel, summary sidebar and validation-information panel now use shared 20px surfaces, softer borders and clearer hierarchy. Server-side recalculation, delivery, coupon, stock, payment and idempotency logic are unchanged. |
+| Authentication visual refinement | PASS | Login/register/forgot/reset share a tighter responsive auth shell with tokenized 24px surfaces, compact spacing, stronger CTA sizing and a visible forgot-password path. Account security uses the same hero radius. Password/session logic is unchanged. |
+| Customer account shell refinement | PASS | Added a shared authenticated account layout with responsive horizontal-to-sidebar navigation, active-safe soft surfaces, welcome heading, logout action and mobile overflow protection. Existing page authorization and ownership logic remain unchanged. |
+| Account dashboard/profile/addresses refinement | PASS | Dashboard cards and real order summaries now use shared soft surfaces; removed stale duplicate navigation and placeholder review copy; profile and address forms/cards now use consistent labels, inputs, panels and empty states. Data queries and ownership validation are unchanged. |
+
 ## Run 2026-07-18 — environment discovery and local release gate
 
 | Field                      | Evidence                                                                                       |
@@ -154,3 +179,32 @@ Once those resources exist, follow `STAGING_SETUP.md`, run `npm ci`, `npm run db
 | `npm run build`             | PASS — compiled in 4.8s, TypeScript 4.3s, 46 generated static pages plus dynamic routes |
 
 `npm audit` reports two moderate findings caused by Next.js's nested PostCSS version. The offered automatic remediation is a breaking/invalid downgrade to Next.js 9.3.3, so it was not applied. There are zero high or critical findings. This needs upstream-compatible dependency remediation before launch, not a forced downgrade.
+## Run 2026-07-21 — admin and public continuation
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Branch safety | PASS | Work remained on `staging`; production was not changed. |
+| Shared admin system | PASS locally | Existing admin components/CSS refined; RBAC and mutations unchanged. |
+| Admin dashboard | PASS locally | Real paid revenue, order, inventory and operational queue data only. |
+| Products/inventory/orders | PASS locally | Responsive controls, badges, empty states and preserved-filter pagination added. |
+| Public information pages | PASS locally | About, Contact, FAQ, Blog and payment-result presentation refined; placeholder claims removed. |
+| Environment audits | PASS | `npm run env:audit` and `npm run predeploy:audit`. |
+| Database/migrations | PASS locally | Local database connected; 12 migrations current. No staging/production migration run. |
+| Static verification | PASS | ESLint and TypeScript passed. |
+| Unit tests | PASS | 17 files, 66 tests. |
+| Playwright | PARTIAL | 6/7 passed. Forced-password test blocked at login by unavailable fixture credentials. |
+| Build | PASS | Next.js production build completed; 46 static-generation jobs completed. |
+| Manual accessibility/device matrix | BLOCKED | In-app browser connection unavailable; no manual or authenticated claim made. |
+| Deployment | NOT RUN | No commit, push, or Vercel deployment performed pending complete review. |
+## Run 2026-07-21 — forced-password fixture and operational pages
+
+| Check | Result | Evidence / limitation |
+| --- | --- | --- |
+| Forced-password fixture isolation | PASS | Playwright no longer reuses a potentially mismatched developer server. |
+| Temporary admin | PASS | Test-owned identity; generated policy-compliant passwords remain in memory and are never printed. |
+| Forced-password assertions | PASS | Redirect, clearing flag, replacement session, hash change, old rejection, and new login verified. |
+| Coupons/reviews/returns/refunds/support/zones | PASS locally | Visible operational refinement; server actions and protections unchanged. |
+| Settings/public state pages | PASS locally | Sticky save and completed information/error surfaces. |
+| Full automated gate | PASS | Audits, DB, 12 migrations, lint, typecheck, 66 unit tests, 7 E2E tests, build. |
+| Responsive/accessibility manual matrix | BLOCKED | Browser surface unavailable; see `RESPONSIVE_QA.md` and `ACCESSIBILITY_AUDIT.md`. |
+| Commit/deploy | NOT RUN | Manual QA and authenticated staging prerequisites remain incomplete. |

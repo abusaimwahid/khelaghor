@@ -5,6 +5,8 @@ import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { prisma } from "@/server/db";
 import { requirePermission } from "@/server/security";
 import { dhakaDate, money } from "@/lib/utils";
+import { AdminEmpty, AdminPagination, AdminStat } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +71,7 @@ export default async function AdminOrdersPage({
     prisma.order.groupBy({ by: ["status"], _count: { status: true } }),
   ]);
   const pages = Math.max(1, Math.ceil(total / pageSize));
+  const query = new URLSearchParams(Object.entries(params ?? {}).filter(([key, value]) => key !== "page" && value));
 
   return (
     <AdminShell>
@@ -78,12 +81,7 @@ export default async function AdminOrdersPage({
       />
       <div className="grid gap-3 md:grid-cols-5">
         {Object.values(OrderStatus).slice(0, 5).map((status) => (
-          <div key={status} className="kg-card p-4">
-            <p className="text-xs font-black uppercase text-slate-500">{status}</p>
-            <p className="mt-1 text-2xl font-black text-navy">
-              {summary.find((item) => item.status === status)?._count.status ?? 0}
-            </p>
-          </div>
+          <AdminStat key={status} label={status} value={summary.find((item) => item.status === status)?._count.status ?? 0} detail="Filtered results" />
         ))}
       </div>
       <form className="kg-card grid gap-3 p-4 lg:grid-cols-[1fr_repeat(4,160px)_auto]">
@@ -98,10 +96,10 @@ export default async function AdminOrdersPage({
         </select>
         <input name="paymentMethod" defaultValue={params?.paymentMethod ?? ""} placeholder="Payment" className="h-11 rounded-md border px-3" />
         <input name="deliveryMethod" defaultValue={params?.deliveryMethod ?? ""} placeholder="Delivery" className="h-11 rounded-md border px-3" />
-        <button className="rounded-md bg-navy px-4 font-black text-white">Filter</button>
+        <button className="admin-button bg-navy px-4 text-white">Filter</button>
       </form>
       <div className="flex justify-end">
-        <Link href="/admin/orders/export" className="rounded-md border border-[var(--border)] bg-white px-4 py-3 font-black text-navy">
+        <Link href={`/admin/orders/export?${query}`} className="admin-button admin-button-secondary">
           Export CSV
         </Link>
       </div>
@@ -136,34 +134,29 @@ export default async function AdminOrdersPage({
                   <td className="p-3">{dhakaDate(order.createdAt)}</td>
                   <td className="p-3">{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
                   <td className="p-3 font-black">{money(Number(order.total))}</td>
-                  <td className="p-3">{order.paymentMethod}<br /><span className="text-xs text-slate-500">{order.paymentStatus}</span></td>
+                  <td className="p-3">{order.paymentMethod}<br /><StatusBadge className="mt-1">{order.paymentStatus}</StatusBadge></td>
                   <td className="p-3">{order.deliveryMethod}</td>
                   <td className="p-3">{order.courierProvider || "Not assigned"}<br /><span className="text-xs text-slate-500">{order.trackingId || ""}</span></td>
-                  <td className="p-3">{order.status}</td>
+                  <td className="p-3"><StatusBadge>{order.status}</StatusBadge></td>
                   <td className="p-3">
                     <div className="flex flex-wrap gap-2">
-                      <Link href={`/admin/orders/${order.id}`} className="rounded-md border px-3 py-2 font-bold">Open</Link>
+                      <Link href={`/admin/orders/${order.id}`} className="admin-button admin-button-secondary">Open</Link>
                       <form action={updateOrderStatusAction} className="flex gap-2">
                         <input type="hidden" name="orderId" value={order.id} />
                         <select name="status" defaultValue={order.status} className="rounded-md border px-2">
                           {Object.values(OrderStatus).map((status) => <option key={status}>{status}</option>)}
                         </select>
-                        <button className="rounded-md bg-coral px-3 font-bold text-white">Update</button>
+                        <button className="admin-button admin-button-primary">Update</button>
                       </form>
                     </div>
                   </td>
                 </tr>
               ))}
+              {!orders.length ? <AdminEmpty colSpan={10} title="No orders found" description="Adjust the current filters or date range to find another order." /> : null}
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between border-t p-4 text-sm font-bold">
-          <span>Page {page} of {pages}</span>
-          <div className="flex gap-2">
-            <Link className="rounded-md border px-3 py-2" href={`/admin/orders?q=${encodeURIComponent(q)}&page=${Math.max(1, page - 1)}`}>Previous</Link>
-            <Link className="rounded-md border px-3 py-2" href={`/admin/orders?q=${encodeURIComponent(q)}&page=${Math.min(pages, page + 1)}`}>Next</Link>
-          </div>
-        </div>
+        <AdminPagination page={page} pages={pages} href={(next) => { const nextQuery = new URLSearchParams(query); nextQuery.set("page", String(next)); return `/admin/orders?${nextQuery}`; }} />
       </section>
     </AdminShell>
   );

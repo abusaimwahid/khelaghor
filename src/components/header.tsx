@@ -67,7 +67,7 @@ export async function Header() {
     12,
   );
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/95 shadow-[0_8px_30px_rgba(16,38,74,.05)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-white/95 shadow-[var(--shadow-sm)] backdrop-blur-xl">
       {announcement.enabled && messages.length ? (
         <div className="bg-navy text-white">
           <div className="container grid h-9 grid-cols-1 items-center gap-3 text-xs font-bold md:grid-cols-[1fr_auto]">
@@ -84,7 +84,7 @@ export async function Header() {
       <div className="container grid min-h-20 grid-cols-[auto_1fr_auto] items-center gap-4 py-3 lg:grid-cols-[220px_1fr_auto]">
         <div className="flex items-center gap-2">
           <button
-            className="focus-ring grid h-11 w-11 place-items-center rounded-xl border border-[var(--border)] bg-white lg:hidden"
+            className="focus-ring grid h-11 w-11 place-items-center rounded-[var(--radius-control)] border border-[var(--border)] bg-white transition hover:border-coral hover:bg-[var(--surface-peach)] lg:hidden"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -169,7 +169,7 @@ export async function Header() {
       </div>
       <form
         action="/search"
-        className="container mb-3 flex h-11 overflow-hidden rounded-xl border border-[var(--border)] bg-[#f8fafc] focus-within:border-coral md:hidden"
+        className="container mb-3 flex h-12 overflow-hidden rounded-[var(--radius-control)] border border-[var(--border)] bg-[var(--surface-soft)] focus-within:border-coral focus-within:bg-white md:hidden"
       >
         <input
           name="q"

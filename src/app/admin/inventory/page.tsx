@@ -4,6 +4,8 @@ import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { prisma } from "@/server/db";
 import { inventoryMovementTypes } from "@/server/inventory";
 import { requirePermission } from "@/server/security";
+import { AdminEmpty, AdminPagination, AdminStat } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -100,10 +102,10 @@ export default async function AdminInventoryPage({
         description="Track available, reserved, incoming, sold, returned and damaged stock with transaction-safe adjustment history."
       />
       <div className="grid gap-3 md:grid-cols-4">
-        <SummaryCard label="Available" value={summary.available} />
-        <SummaryCard label="Reserved" value={summary.reserved} />
-        <SummaryCard label="Low stock" value={summary.low} />
-        <SummaryCard label="Out of stock" value={summary.out} />
+        <AdminStat label="Available" value={summary.available} detail="Visible page" />
+        <AdminStat label="Reserved" value={summary.reserved} detail="Visible page" />
+        <AdminStat label="Low stock" value={summary.low} detail="Visible page" />
+        <AdminStat label="Out of stock" value={summary.out} detail="Visible page" />
       </div>
       <form className="kg-card grid gap-3 p-4 md:grid-cols-[1fr_180px_180px_180px_auto]">
         <input
@@ -146,14 +148,14 @@ export default async function AdminInventoryPage({
             </option>
           ))}
         </select>
-        <button className="rounded-md bg-navy px-4 font-black text-white">
+        <button className="admin-button bg-navy px-4 text-white">
           Filter
         </button>
       </form>
       <div className="flex justify-end">
         <Link
           href="/admin/inventory/export"
-          className="rounded-md border border-[var(--border)] bg-white px-4 py-3 font-black text-navy"
+          className="admin-button admin-button-secondary"
         >
           Export CSV
         </Link>
@@ -181,12 +183,11 @@ export default async function AdminInventoryPage({
               {filteredProducts.map((product) => (
                 <InventoryRow key={product.id} product={product} />
               ))}
+              {!filteredProducts.length ? <AdminEmpty colSpan={12} title="No inventory rows" description="Adjust the filters to find another product or stock state." /> : null}
             </tbody>
           </table>
         </div>
-        <div className="border-t border-[var(--border)] p-4 text-sm font-bold">
-          Page {page} of {Math.max(1, Math.ceil(total / pageSize))}
-        </div>
+        <AdminPagination page={page} pages={Math.max(1, Math.ceil(total / pageSize))} href={(next) => `/admin/inventory?q=${encodeURIComponent(q)}&status=${params?.status ?? ""}&category=${params?.category ?? ""}&brand=${params?.brand ?? ""}&page=${next}`} />
       </section>
       <section className="kg-card p-6">
         <h2 className="text-xl font-black text-navy">Movement History</h2>
@@ -224,6 +225,7 @@ export default async function AdminInventoryPage({
                   <td className="p-3">{movement.reason}</td>
                 </tr>
               ))}
+              {!movements.length ? <AdminEmpty colSpan={8} title="No inventory movements" description="Stock adjustments and transactional movements will appear here." /> : null}
             </tbody>
           </table>
         </div>
@@ -269,7 +271,7 @@ function InventoryRow({
         <td className="p-3">{product.inventory?.returned ?? 0}</td>
         <td className="p-3">{product.inventory?.damaged ?? 0}</td>
         <td className="p-3">{product.lowStockThreshold}</td>
-        <td className="p-3">{status}</td>
+        <td className="p-3"><StatusBadge>{status}</StatusBadge></td>
         <td className="p-3">
           <AdjustmentForm productId={product.id} />
         </td>
@@ -290,9 +292,9 @@ function InventoryRow({
           <td className="p-3">0</td>
           <td className="p-3">{variant.lowStockThreshold}</td>
           <td className="p-3">
-            {variant.stock - variant.reservedStock <= 0
+            <StatusBadge>{variant.stock - variant.reservedStock <= 0
               ? "Out of stock"
-              : "In stock"}
+              : "In stock"}</StatusBadge>
           </td>
           <td className="p-3">
             <AdjustmentForm productId={product.id} variantId={variant.id} />
@@ -356,14 +358,5 @@ function AdjustmentForm({
         Apply
       </button>
     </form>
-  );
-}
-
-function SummaryCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="kg-card p-4">
-      <p className="text-xs font-black uppercase text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-black text-navy">{value}</p>
-    </div>
   );
 }

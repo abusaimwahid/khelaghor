@@ -7,6 +7,9 @@ import {
 import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { prisma } from "@/server/db";
 import { requirePermission } from "@/server/security";
+import { AdminEmpty, AdminPagination } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
+import { Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +68,7 @@ export default async function AdminReviewsPage({
         title="Reviews"
         description="Moderate verified customer reviews, public replies, suspicious flags and featured states."
       />
-      <form className="flex flex-wrap gap-2">
+      <form className="admin-section flex flex-wrap gap-2 p-4">
         <input
           name="q"
           defaultValue={q}
@@ -114,7 +117,7 @@ export default async function AdminReviewsPage({
           <option value="true">Featured</option>
           <option value="false">Not featured</option>
         </select>
-        <button className="rounded-md bg-navy px-4 font-black text-white">
+        <button className="admin-button bg-navy px-4 text-white">
           Filter
         </button>
       </form>
@@ -145,12 +148,12 @@ export default async function AdminReviewsPage({
                 <tr key={review.id} className="border-t border-[var(--border)]">
                   <td className="p-3">{review.user.email}</td>
                   <td className="p-3">{review.product.name}</td>
-                  <td className="p-3">{review.rating}/5</td>
-                  <td className="p-3">{review.text.slice(0, 90)}</td>
+                  <td className="p-3"><span className="inline-flex items-center gap-1 font-black text-orange"><Star className="h-4 w-4 fill-current" />{review.rating}/5</span></td>
+                  <td className="max-w-sm p-3"><p className="line-clamp-3 leading-6">{review.text}</p></td>
                   <td className="p-3">
                     {review.verifiedPurchase ? "Yes" : "No"}
                   </td>
-                  <td className="p-3">{review.status}</td>
+                  <td className="p-3"><StatusBadge>{review.status}</StatusBadge></td>
                   <td className="p-3">{review.featured ? "Yes" : "No"}</td>
                   <td className="p-3">
                     {review.createdAt.toLocaleDateString("en-BD")}
@@ -159,7 +162,7 @@ export default async function AdminReviewsPage({
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/admin/reviews/${review.id}`}
-                        className="rounded-md border px-3 py-2 font-bold"
+                        className="admin-button admin-button-secondary"
                       >
                         Open
                       </Link>
@@ -185,7 +188,7 @@ export default async function AdminReviewsPage({
                           name="featured"
                           value={String(!review.featured)}
                         />
-                        <button className="rounded-md border px-3 py-2 font-bold">
+                        <button className="admin-button admin-button-secondary">
                           {review.featured ? "Unfeature" : "Feature"}
                         </button>
                       </form>
@@ -193,13 +196,12 @@ export default async function AdminReviewsPage({
                   </td>
                 </tr>
               ))}
+              {!reviews.length ? <AdminEmpty colSpan={9} title="No reviews found" description="No customer reviews match the current moderation filters." /> : null}
             </tbody>
           </table>
         </div>
       </section>
-      <p className="text-sm font-bold text-slate-500">
-        Page {page} of {Math.max(1, Math.ceil(total / 25))}
-      </p>
+      <AdminPagination page={page} pages={Math.max(1, Math.ceil(total / 25))} href={(next) => `/admin/reviews?q=${encodeURIComponent(q)}&status=${params?.status ?? ""}&rating=${params?.rating ?? ""}&verified=${params?.verified ?? ""}&featured=${params?.featured ?? ""}&page=${next}`} />
     </AdminShell>
   );
 }
@@ -217,7 +219,7 @@ function ReviewButton({
     <form action={moderateReviewAction}>
       <input type="hidden" name="reviewId" value={id} />
       <input type="hidden" name="action" value={action} />
-      <button className="rounded-md border px-3 py-2 font-bold">{label}</button>
+      <button className={action === "approve" ? "admin-button bg-emerald-600 text-white" : action === "reject" || action === "hide" ? "admin-button admin-button-danger" : "admin-button admin-button-secondary"}>{label}</button>
     </form>
   );
 }

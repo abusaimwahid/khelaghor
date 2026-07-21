@@ -23,7 +23,7 @@ export default async function CheckoutPage() {
       <form
         action="/api/checkout/place"
         method="post"
-        className="kg-card p-5 md:p-6"
+        className="kg-card rounded-[var(--radius-panel)] p-5 md:p-8"
       >
         <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
         <div className="mb-6">
@@ -44,7 +44,7 @@ export default async function CheckoutPage() {
             />
           </div>
         ) : null}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           <label className="font-bold text-navy">
             Full name
             <input
@@ -75,7 +75,7 @@ export default async function CheckoutPage() {
           <CouponBox />
         </div>
         <BangladeshAddressSelector divisions={divisions} />
-        <label className="mt-6 flex gap-3 rounded-[16px] bg-gradient-to-r from-[#fff8ec] to-[#f5fbfa] p-5 text-sm font-semibold text-slate-700">
+        <label className="mt-6 flex gap-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-peach)] p-5 text-sm font-semibold text-slate-700">
           <input type="checkbox" name="termsAccepted" required />
           <span>
             I agree to the{" "}
@@ -90,8 +90,9 @@ export default async function CheckoutPage() {
         </label>
         <CheckoutSubmitButton disabled={cart.items.length === 0} />
       </form>
-      <aside className="kg-card h-fit p-7 lg:sticky lg:top-40">
-        <h2 className="text-xl font-black text-navy">Review</h2>
+      <aside className="kg-card h-fit rounded-[var(--radius-panel)] p-7 lg:sticky lg:top-40">
+        <p className="storefront-eyebrow">Order summary</p>
+        <h2 className="mt-1 text-2xl font-black text-navy">Review</h2>
         {cart.items.map((item) => (
           <p key={item.id} className="mt-3 text-sm text-slate-600">
             {item.quantity} × {item.product.name}
@@ -109,7 +110,7 @@ export default async function CheckoutPage() {
           <span>Items total</span>
           <strong>{money(totals.subtotal)}</strong>
         </p>
-        <div className="mt-6 space-y-3 rounded-lg bg-cream p-4 text-sm font-semibold text-slate-700">
+        <div className="mt-6 space-y-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-mint)] p-4 text-sm font-semibold text-slate-700">
           <p className="flex gap-2">
             <ShieldCheck className="h-5 w-5 shrink-0 text-teal" /> Secure
             server-side order validation

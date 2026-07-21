@@ -14,7 +14,7 @@ export default async function CartPage() {
   const totals = secureCartTotals(cart);
   return (
     <div className="container storefront-page grid gap-8 lg:grid-cols-[1fr_380px]">
-      <section className="kg-card p-5 md:p-6">
+      <section className="kg-card rounded-[var(--radius-panel)] p-5 md:p-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-sm font-black uppercase text-teal">
@@ -31,7 +31,7 @@ export default async function CartPage() {
             cart.items.map((item) => (
               <div
                 key={item.id}
-                className="grid gap-4 rounded-[16px] border border-[var(--border)] bg-gradient-to-r from-white to-[#fbfcfd] p-5 transition hover:shadow-md md:grid-cols-[1fr_140px_120px]"
+                className="grid gap-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)] transition hover:shadow-[var(--shadow-md)] md:grid-cols-[1fr_140px_120px]"
               >
                 <div>
                   <strong className="text-navy">{item.product.name}</strong>
@@ -83,7 +83,7 @@ export default async function CartPage() {
           )}
         </div>
       </section>
-      <aside className="kg-card h-fit p-7 lg:sticky lg:top-40">
+      <aside className="kg-card h-fit rounded-[var(--radius-panel)] p-7 lg:sticky lg:top-40">
         <h2 className="text-xl font-black text-navy">Order Summary</h2>
         <div className="mt-4 space-y-3 text-sm">
           <p className="flex justify-between">

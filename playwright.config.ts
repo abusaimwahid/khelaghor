@@ -10,7 +10,9 @@ export default defineConfig({
   webServer: {
     command: "npx tsx e2e/prepare-db.ts && npm run dev",
     url: "http://localhost:3000",
-    reuseExistingServer: true,
+    // Never attach local E2E to a developer server that may be using another
+    // database. The Playwright server must inherit the isolated test URL.
+    reuseExistingServer: false,
   },
   use: {
     baseURL: "http://localhost:3000",

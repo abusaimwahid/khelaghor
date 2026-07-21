@@ -3,6 +3,9 @@ import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { prisma } from "@/server/db";
 import { inspectReturn, transitionReturn } from "@/server/returns";
 import { requirePermission } from "@/server/security";
+import { AdminEmpty } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
+import { Paperclip } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +69,7 @@ export default async function AdminReturnsPage({
       order: { include: { user: true } },
       items: { include: { orderItem: true } },
       history: { orderBy: { createdAt: "desc" }, take: 3 },
+      evidence: true,
     },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -76,7 +80,7 @@ export default async function AdminReturnsPage({
         title="Returns"
         description="Review return requests, receive products, inspect inventory destination and keep a customer-visible timeline."
       />
-      <form className="flex flex-wrap gap-2">
+      <form className="admin-section flex flex-wrap gap-2 p-4">
         <input
           name="q"
           defaultValue={params?.q ?? ""}
@@ -111,20 +115,21 @@ export default async function AdminReturnsPage({
           <option>Refund</option>
           <option>Store credit</option>
         </select>
-        <button className="rounded-md bg-navy px-4 font-black text-white">
+        <button className="admin-button bg-navy px-4 text-white">
           Filter
         </button>
       </form>
       <div className="space-y-4">
         {returns.map((ret) => (
-          <article key={ret.id} className="kg-card p-5">
+          <article key={ret.id} className="kg-card overflow-hidden">
+            <div className="p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <strong className="text-lg text-navy">{ret.number}</strong>
                 <p className="text-sm text-slate-500">
-                  {ret.order.number} • {ret.order.user?.email ?? "Guest"} •{" "}
-                  {ret.status}
+                  {ret.order.number} • {ret.order.user?.email ?? "Guest"}
                 </p>
+                <StatusBadge className="mt-2">{ret.status}</StatusBadge>
                 <p className="mt-1 text-sm">
                   {ret.reason} • {ret.resolution ?? "No resolution selected"}
                 </p>
@@ -154,14 +159,15 @@ export default async function AdminReturnsPage({
                   placeholder="Private note"
                   className="h-10 rounded-md border px-2"
                 />
-                <button className="rounded-md bg-coral px-4 font-bold text-white">
+                <button className="admin-button admin-button-primary">
                   Update
                 </button>
               </form>
             </div>
-            <form
+            {ret.evidence.length ? <div className="mt-4 flex flex-wrap gap-2">{ret.evidence.map((file, index) => <a key={file.id} href={file.url} target="_blank" rel="noreferrer" className="admin-button admin-button-secondary max-w-full"><Paperclip className="h-4 w-4" /><span className="truncate">{file.fileName || `Evidence ${index + 1}`}</span></a>)}</div> : null}
+            </div><form
               action={inspectReturnAction}
-              className="mt-4 flex flex-wrap gap-2 rounded-md bg-cream p-3"
+              className="flex flex-wrap gap-2 border-y border-[var(--border)] bg-amber-50 p-4"
             >
               <input type="hidden" name="returnId" value={ret.id} />
               <select name="result" className="h-10 rounded-md border px-2">
@@ -174,19 +180,20 @@ export default async function AdminReturnsPage({
                 placeholder="Inspection note required"
                 className="h-10 min-w-64 flex-1 rounded-md border px-2"
               />
-              <button className="rounded-md bg-navy px-4 font-bold text-white">
+              <button className="admin-button bg-navy text-white">
                 Save inspection
               </button>
             </form>
-            <div className="mt-3 space-y-1 text-xs text-slate-500">
+            <div className="space-y-3 p-5 text-xs text-slate-500">
               {ret.history.map((row) => (
-                <p key={row.id}>
-                  {row.toStatus} • {row.publicNote}
+                <p key={row.id} className="border-l-2 border-teal/30 pl-3">
+                  <StatusBadge>{row.toStatus}</StatusBadge> <span className="ml-2">{row.createdAt.toLocaleString("en-BD")}</span>{row.publicNote ? <span className="mt-1 block text-sm">{row.publicNote}</span> : null}
                 </p>
               ))}
             </div>
           </article>
         ))}
+        {!returns.length ? <AdminEmpty title="No returns found" description="No return requests match the current operational filters." /> : null}
       </div>
     </AdminShell>
   );

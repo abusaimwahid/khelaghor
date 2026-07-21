@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { prisma } from "@/server/db";
 import { requirePermission } from "@/server/security";
 import { money, dhakaDate } from "@/lib/utils";
+import { AdminEmpty, AdminPagination } from "@/components/admin/admin-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -125,7 +126,7 @@ export default async function AdminProductsPage({
       </section>
 
       <form action={bulkProductAction} className="kg-card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] p-5">
+        <div className="admin-toolbar">
           <div>
             <h2 className="text-xl font-black text-navy">
               {count} product{count === 1 ? "" : "s"}
@@ -134,7 +135,7 @@ export default async function AdminProductsPage({
               Page {page} of {totalPages}
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="admin-actions">
             <select
               name="bulkAction"
               className="h-10 rounded-md border border-[var(--border)] px-3 font-bold"
@@ -151,7 +152,7 @@ export default async function AdminProductsPage({
               <option value="archive">Archive</option>
               <option value="delete">Delete if unused</option>
             </select>
-            <button className="rounded-md border border-[var(--border)] px-4 font-black text-navy">
+            <button className="admin-button admin-button-secondary">
               Apply
             </button>
             <Link
@@ -289,28 +290,10 @@ export default async function AdminProductsPage({
             </table>
           </div>
         ) : (
-          <div className="p-10 text-center">
-            <h2 className="text-xl font-black text-navy">No products found</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Adjust filters or create a product to start filling the catalog.
-            </p>
-          </div>
+          <AdminEmpty title="No products found" description="Adjust filters or create a product to start filling the catalog." />
         )}
+        <AdminPagination page={page} pages={totalPages} href={(next) => `/admin/products?${withPage(queryBase, next)}`} />
       </form>
-      <div className="flex justify-between">
-        <PageLink
-          disabled={page <= 1}
-          href={`/admin/products?${withPage(queryBase, page - 1)}`}
-        >
-          Previous
-        </PageLink>
-        <PageLink
-          disabled={page >= totalPages}
-          href={`/admin/products?${withPage(queryBase, page + 1)}`}
-        >
-          Next
-        </PageLink>
-      </div>
     </AdminShell>
   );
 }
@@ -402,32 +385,6 @@ function withPage(query: URLSearchParams, page: number) {
   const next = new URLSearchParams(query);
   next.set("page", String(page));
   return next.toString();
-}
-
-function PageLink({
-  href,
-  disabled,
-  children,
-}: {
-  href: string;
-  disabled: boolean;
-  children: React.ReactNode;
-}) {
-  if (disabled) {
-    return (
-      <span className="rounded-md border border-[var(--border)] px-4 py-2 font-bold text-slate-400">
-        {children}
-      </span>
-    );
-  }
-  return (
-    <Link
-      href={href}
-      className="rounded-md border border-[var(--border)] px-4 py-2 font-bold text-navy"
-    >
-      {children}
-    </Link>
-  );
 }
 
 function StockBadge({

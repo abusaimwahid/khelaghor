@@ -33,4 +33,10 @@ Repository integration note: the production `khelaghor` project also auto-create
 
 **NO-GO.** No public production deployment was performed. The decision cannot become GO until every critical category is supported by real, redacted staging evidence and is marked PASS by its accountable owner.
 
+Continuation update (2026-07-18): staging login and health endpoints responded successfully, but password rotation and authenticated customer/admin smoke evidence remain **BLOCKED** because an authorized interactive staging credential was not available to this execution. Environment and deploy audits pass. NO-GO remains unchanged.
+
 Exact next action: the owner accepts the Neon marketplace terms returned by Vercel (or selects another managed provider), then connect a synthetic-data staging database to `khelaghor-staging`, add Cloudinary/Resend staging credentials, and execute the migration/admin/health gate before deployment workflows.
+
+Continuation update (2026-07-21): the shared admin system, operational dashboard, product/inventory/order lists, and core information pages received a local premium refinement. Environment audits, local database and migration checks, lint, typecheck, 66 unit tests, and production build pass. Six Playwright workflows pass; forced-password verification remains blocked by unavailable authorized fixture credentials. Manual responsive/accessibility evidence, authenticated staging workflows, provider integrations, legal approval, measured performance, reviewed commit, and staging deployment remain incomplete. **GO-LIVE remains NO-GO.**
+
+Operational gate update (2026-07-21): the forced-password local fixture issue is resolved without staging credentials or reduced assertions, and all 7 Playwright workflows pass. Remaining admin trust/operations and public state pages received visible refinements. Manual device/accessibility evidence and authenticated staging/provider validation remain incomplete, so changes were not committed or deployed. **GO-LIVE remains NO-GO.**

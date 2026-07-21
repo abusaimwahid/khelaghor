@@ -12,7 +12,7 @@ export default async function AccountSecurityPage({
   const params = await searchParams;
   return (
     <div className="container grid min-h-[calc(100vh-12rem)] place-items-center py-10 sm:py-14">
-      <section className="kg-card w-full max-w-xl rounded-[24px] p-6 sm:p-9">
+      <section className="kg-card w-full max-w-xl rounded-[var(--radius-hero)] p-6 sm:p-9">
         <p className="text-sm font-black uppercase text-teal">
           Account security
         </p>

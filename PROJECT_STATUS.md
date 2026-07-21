@@ -217,6 +217,24 @@
 
 ## Verification Results
 
+### Current staging continuation (2026-07-18)
+
+- Staging login and health endpoints are reachable (HTTP 200).
+- Forced-password rotation and authenticated customer/admin smoke suites remain **BLOCKED** in this execution because no authorized interactive staging credential was available. No credential was guessed or logged.
+- `npm run env:audit` and `npm run predeploy:audit` pass. Deploy audit now fails closed when runtime env files are present without matching `.vercelignore` entries and explicitly requires `.env.example`.
+- Added an ignored-credential staging E2E harness (`npm run test:e2e:staging`) with a fixed staging origin, read-only defaults, no screenshots/video/traces, and fail-closed credential validation. Fixture commands are dry-run by default.
+- Added regression coverage for operator credential requirements, unsafe-origin rejection, paired mutation flags, and disabled screenshot/video/trace capture. No authenticated staging credentials were supplied, so remote smoke workflows remain blocked.
+- Full local verification passed: local database check, 12 migrations current, lint, typecheck, 66 Vitest tests, 7 Playwright tests, and build. Prisma local command wrappers now explicitly load localhost-only `.env.local`; `.env` contains only the same local development placeholders.
+- Environment protection audit passed: `.env`/`.env.local` are ignored and untracked, and `.env.example` no longer contains concrete database or seed-password values.
+- Applied the first visible page-level premium pass to shared navigation and homepage surfaces: consistent 12/16/20/24px radii, softer shadows, stronger section hierarchy, responsive search controls and tokenized CTA buttons. No backend or data behavior changed.
+- Refined the shared product card and shop page with consistent image framing, brand/category metadata, tokenized radii/shadows, softer filter panels and responsive grid spacing. Product data, filters and URL behavior are unchanged.
+- Refined category pages and product detail surfaces with premium hero/gallery framing, consistent child-category cards, guide panels, tab states and delivery/trust surfaces. Existing database queries, structured data, variant handling and cart validation remain unchanged.
+- Refined brand index/detail and cart pages with rounded collection headers, responsive brand cards, breadcrumbs, softer line-item cards and tokenized summary panels. Brand queries, cart totals and update actions remain unchanged.
+- Refined checkout presentation with premium rounded form and summary panels, clearer order-summary hierarchy, softer terms and validation surfaces, and responsive spacing. Checkout calculations and transactional behavior remain unchanged.
+- Refined the shared authentication shell and account security surface with compact responsive proportions, tokenized hero radius, stronger primary action sizing and a clear forgot-password link. Forced-password and session security behavior remain unchanged.
+- Added a shared authenticated account shell with responsive navigation, welcome context, logout placement and tokenized card surfaces across account pages. Existing authorization, ownership and action behavior remains unchanged.
+- Refined account dashboard, profile and addresses pages with real-data summary cards, softer order rows, grouped form fields, address cards and empty states. Removed stale placeholder review copy without changing account queries or ownership validation.
+
 - `npm run db:generate`: passed.
 - `npm run db:check`: passed.
 - `npm run db:migrate:dev -- --name core_commerce_operations`: passed and applied `20260716185000_core_commerce_operations`.
@@ -225,7 +243,29 @@
 - `npx prisma migrate resolve --applied 20260713150000_initial_baseline`: passed for local baseline reconciliation.
 - `npm run db:migrate:deploy`: passed locally and applied `20260713162000_production_deployment_fields`.
 - `npm run db:push`: previously passed against local PostgreSQL; do not use for production.
-- `npm run db:seed`: passed. Admin: `admin@khelaghor.local` / `ChangeMe123!`.
+- `npm run db:seed`: passed. Development seed credentials are intentionally omitted from project documentation.
+
+### Continuation — 2026-07-21
+
+- Completed a premium shared-admin refinement without creating a parallel component system: compact panels, toolbar/action groups, empty/warning states, pagination, visible focus, destructive styling, stronger row hover, and mobile overflow protections.
+- Rebuilt the admin dashboard around real paid-revenue aggregation, order counts, stock states, recent orders, and live support/return/refund queues. No sample metrics were introduced.
+- Refined product, inventory, and order operations with shared status badges, filtered export links, preserved-query pagination, responsive controls, and table empty states. Mutations, RBAC, transition validation, and inventory logic were not changed.
+- Refined About, Contact, FAQ, Blog, and payment-result pages. Placeholder address/phone/payment claims were removed; no business or legal approval claim was added.
+- Local verification: environment and deploy audits PASS; local database PASS; Prisma client generated; 12 migrations current; lint PASS; typecheck PASS; 66 Vitest tests PASS; production build PASS.
+- Playwright: 6 of 7 workflows PASS. Forced-password rotation is BLOCKED at login because the expected authorized fixture credential is unavailable; the test was not weakened. This is not authenticated staging evidence.
+- In-app manual browser QA was unavailable in this execution, so keyboard, screen-reader, 200% zoom, device-matrix screenshots, and manual console evidence remain BLOCKED.
+- Secret audit: `.env`, `.env.local`, and `.env.staging.runtime` are ignored; no environment file is tracked; the documented development seed password was removed.
+- No commit, push, or deployment was performed. The staging worktree remains under review and GO-LIVE remains NO-GO.
+
+### Operational completion gate — 2026-07-21
+
+- Fixed the local forced-password E2E isolation defect. Root cause: `reuseExistingServer: true` could attach Playwright to a developer server using the local database while fixtures were created in the isolated Playwright database.
+- Playwright now always starts its own database-configured server. The password-flow spec owns a deterministic test identity, generates policy-compliant temporary/private passwords in memory, never prints them, and removes the fixture afterward.
+- Forced-password coverage verifies redirect, password update, `forcePasswordChange=false`, one replacement session, old-password rejection, and new-password login. Full Playwright result: **7/7 PASS**.
+- Refined coupon, review/detail, return, refund, support, delivery-zone, and settings operational pages with shared toolbars, status hierarchy, evidence/attachment surfaces, privacy distinctions, responsive actions, empty states, and safe destructive styling.
+- Completed track-order, maintenance, not-found, and error-state presentation without inventing tracking behavior, restoration times, or legal/business claims.
+- Full local gate passes: environment audits, local DB check, Prisma generation, 12 current migrations, lint, typecheck, 66 Vitest tests, 7 Playwright tests, and production build.
+- Manual 320–1440px screenshots, keyboard/assistive-technology evidence, and authenticated staging remain blocked. Because the requested “only then” condition is not met, no commit, push, or deployment was performed.
 - `npm run lint`: passed.
 - `npm run typecheck`: passed.
 - `npm run test`: passed, 9 files / 32 tests.

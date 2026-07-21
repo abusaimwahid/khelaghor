@@ -59,7 +59,7 @@ export default async function CategoryPage({
     take: 3,
   });
   return (
-    <div className="bg-cream py-6">
+    <div className="bg-[var(--background)] py-6">
       <div className="container">
         <nav className="mb-4 text-sm font-bold text-slate-500">
           <Link href="/" className="hover:text-navy">Home</Link>
@@ -68,7 +68,7 @@ export default async function CategoryPage({
           <span className="px-2">/</span>
           <span className="text-navy">{category.name}</span>
         </nav>
-        <section className="grid gap-5 rounded-lg bg-white p-5 shadow-sm md:grid-cols-[1fr_280px]">
+        <section className="grid gap-5 rounded-[var(--radius-hero)] border border-[var(--border)] bg-white p-6 shadow-[var(--shadow-md)] md:grid-cols-[1fr_280px] md:p-8">
           <div>
             <p className="text-sm font-black uppercase text-teal">
               {category.parent ? category.parent.name : "Category"}
@@ -87,7 +87,7 @@ export default async function CategoryPage({
               </span>
             </div>
           </div>
-          <div className="grid min-h-48 place-items-center rounded-lg bg-cream">
+          <div className="grid min-h-48 place-items-center rounded-[var(--radius-panel)] bg-[var(--surface-peach)]">
             {category.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={category.image} alt="" className="h-full max-h-56 w-full object-contain p-4" />
@@ -101,7 +101,7 @@ export default async function CategoryPage({
           <section className="py-6">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
               {category.children.map((child) => (
-                <Link key={child.id} href={`/categories/${child.slug}`} className="rounded-lg bg-white p-4 shadow-sm">
+                <Link key={child.id} href={`/categories/${child.slug}`} className="flex min-h-24 flex-col justify-between rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]">
                   <strong className="text-navy">{child.name}</strong>
                   <p className="mt-1 text-xs font-bold text-slate-500">{child._count.products} products</p>
                 </Link>
@@ -130,21 +130,21 @@ export default async function CategoryPage({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-[var(--border)] bg-white p-8 text-center font-bold text-slate-500">
+            <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--border)] bg-white p-8 text-center font-bold text-slate-500">
               No published products in this category yet.
             </div>
           )}
         </section>
 
         <section className="grid gap-5 py-6 lg:grid-cols-[1fr_360px]">
-          <div className="rounded-lg bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-panel)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
             <h2 className="text-2xl font-black text-navy">Category guide</h2>
             <p className="mt-3 leading-7 text-slate-600">
               {category.seoDescription ||
                 `KhelaGhor keeps ${category.name.toLowerCase()} organised with clear filters, child categories and product details so parents can compare quickly and buy confidently.`}
             </p>
           </div>
-          <div className="rounded-lg bg-white p-5 shadow-sm">
+          <div className="rounded-[var(--radius-panel)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)]">
             <h2 className="font-black text-navy">Buying guides</h2>
             <div className="mt-3 space-y-3">
               {blogs.length ? (

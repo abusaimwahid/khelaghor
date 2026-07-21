@@ -4,6 +4,9 @@ import { deleteReviewAction } from "@/app/actions/customer";
 import { listReviewEligibility } from "@/server/reviews";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/security";
+import { StatusBadge } from "@/components/status-badge";
+import { EmptyState } from "@/components/states";
+import { Star } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +16,7 @@ export default async function AccountReviewsPage() {
     listReviewEligibility(user.id),
     prisma.review.findMany({
       where: { userId: user.id, deletedAt: null },
-      include: {
+      include: { images: true,
         product: {
           include: { images: { orderBy: { sortOrder: "asc" }, take: 1 } },
         },
@@ -22,12 +25,12 @@ export default async function AccountReviewsPage() {
     }),
   ]);
   return (
-    <section className="container space-y-8 py-10">
+    <section className="space-y-5 pb-10">
       <header className="kg-card p-6">
         <p className="text-sm font-black uppercase text-teal">
           Verified purchases
         </p>
-        <h1 className="text-3xl font-black text-navy">My Reviews</h1>
+        <h1 className="text-3xl font-black text-navy">My reviews</h1><p className="mt-2 text-sm leading-6 text-slate-600">Only delivered purchases are eligible. Published ratings contribute to the public product score after approval.</p>
       </header>
       <section className="kg-card p-6">
         <h2 className="text-xl font-black text-navy">Eligible Products</h2>
@@ -35,7 +38,7 @@ export default async function AccountReviewsPage() {
           {eligible.map((item) => (
             <article
               key={item.id}
-              className="flex gap-3 rounded-md bg-cream p-3"
+              className="flex gap-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-soft)] p-4"
             >
               <Thumb src={item.product.images[0]?.url} />
               <div>
@@ -65,17 +68,17 @@ export default async function AccountReviewsPage() {
           {reviews.map((review) => (
             <article
               key={review.id}
-              className="flex gap-3 rounded-md bg-cream p-3"
+              className="flex gap-3 rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-4"
             >
               <Thumb src={review.product.images[0]?.url} />
               <div className="min-w-0 flex-1">
                 <strong className="text-navy">{review.product.name}</strong>
-                <p className="text-sm font-bold text-slate-500">
-                  {review.rating}/5 • {review.status}
-                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-2"><span className="inline-flex items-center gap-1 text-sm font-black text-orange"><Star className="h-4 w-4 fill-current" />{review.rating}/5</span><StatusBadge>{review.status}</StatusBadge></div>
+                {review.title ? <h3 className="mt-2 font-black text-navy">{review.title}</h3> : null}
                 <p className="line-clamp-2 text-sm text-slate-600">
                   {review.text}
                 </p>
+                {review.images.length ? <div className="mt-2 flex flex-wrap gap-2" aria-label={`${review.images.length} review attachments`}>{review.images.map((image, index) => <a key={image.id} href={image.url} target="_blank" rel="noreferrer" className="relative h-14 w-14 overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface-soft)]"><Image src={image.url} alt={`Review evidence ${index + 1}`} fill sizes="56px" className="object-cover" /></a>)}</div> : null}
                 <div className="mt-2 flex gap-2">
                   <Link
                     href={`/account/reviews/${review.id}/edit`}
@@ -93,11 +96,7 @@ export default async function AccountReviewsPage() {
               </div>
             </article>
           ))}
-          {!reviews.length ? (
-            <p className="text-sm font-semibold text-slate-500">
-              You have not submitted reviews yet.
-            </p>
-          ) : null}
+          {!reviews.length ? <EmptyState title="No submitted reviews" description="Your pending, approved and rejected reviews will be kept together here." /> : null}
         </div>
       </section>
     </section>

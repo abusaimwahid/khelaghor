@@ -62,8 +62,8 @@ export function AuthForm({
         ? registerAction
         : undefined;
   return (
-    <section className="container grid min-h-[680px] items-center gap-8 py-10 lg:grid-cols-[1fr_480px] lg:py-14">
-      <div className="hidden min-h-[560px] overflow-hidden rounded-[24px] bg-gradient-to-br from-navy via-[#153963] to-teal p-12 text-white shadow-[var(--shadow-lg)] lg:flex lg:flex-col lg:justify-between">
+    <section className="container grid min-h-[620px] items-center gap-8 py-8 lg:grid-cols-[1fr_480px] lg:py-12">
+      <div className="hidden min-h-[500px] overflow-hidden rounded-[var(--radius-hero)] border border-white/10 bg-gradient-to-br from-navy via-[#153963] to-teal p-10 text-white shadow-[var(--shadow-md)] lg:flex lg:flex-col lg:justify-between">
         <Sparkles className="h-12 w-12 text-sun" />
         <div>
           <p className="text-sm font-black uppercase tracking-[.2em] text-sun">
@@ -84,10 +84,10 @@ export function AuthForm({
       </div>
       <form
         action={action}
-        className="storefront-surface w-full rounded-[24px] p-7 md:p-10"
+        className="storefront-surface w-full rounded-[var(--radius-hero)] p-6 md:p-9"
       >
         <p className="storefront-eyebrow">Welcome to KhelaGhor</p>
-        <h1 className="mt-2 text-4xl font-black tracking-tight text-navy">
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-navy md:text-4xl">
           {title}
         </h1>
         <p className="mt-3 leading-7 text-slate-600">
@@ -132,9 +132,14 @@ export function AuthForm({
             minLength={12}
           />
         ) : null}
-        <button className="kg-button kg-button-primary mt-7 w-full">
+        <button className="kg-button kg-button-primary mt-6 min-h-12 w-full">
           {title}
         </button>
+        {mode === "login" ? (
+          <Link href="/forgot-password" className="mt-4 block text-center text-sm font-black text-teal hover:text-coral">
+            Forgot your password?
+          </Link>
+        ) : null}
         <p className="mt-6 text-center text-sm font-bold text-slate-500">
           {mode === "login" ? (
             <>

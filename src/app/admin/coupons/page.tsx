@@ -10,6 +10,8 @@ import { AdminHero, AdminShell } from "@/components/admin-shell";
 import { money } from "@/lib/utils";
 import { prisma } from "@/server/db";
 import { requirePermission } from "@/server/security";
+import { AdminAlert, AdminEmpty, AdminPagination } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -78,11 +80,9 @@ export default async function CouponsPage({
         description="Authoritative checkout discounts, eligibility rules, usage limits and audit-safe coupon operations."
       />
       {params?.error ? (
-        <p className="rounded-md bg-coral/10 p-3 text-sm font-bold text-coral">
-          {params.error}
-        </p>
+        <AdminAlert>{params.error}</AdminAlert>
       ) : null}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="admin-section admin-toolbar">
         <form className="flex min-w-0 flex-1 flex-wrap gap-2">
           <input
             name="q"
@@ -121,20 +121,20 @@ export default async function CouponsPage({
             <option value="scheduled">Scheduled</option>
             <option value="expired">Expired</option>
           </select>
-          <button className="rounded-md bg-navy px-4 font-black text-white">
+          <button className="admin-button bg-navy px-4 text-white">
             Filter
           </button>
         </form>
-        <div className="flex gap-2">
+        <div className="admin-actions">
           <Link
             href="/admin/coupons/export"
-            className="rounded-md border px-4 py-3 font-black"
+            className="admin-button admin-button-secondary"
           >
             CSV
           </Link>
           <Link
             href="/admin/coupons/new"
-            className="rounded-md bg-coral px-4 py-3 font-black text-white"
+            className="admin-button admin-button-primary"
           >
             New coupon
           </Link>
@@ -208,9 +208,7 @@ export default async function CouponsPage({
                     {coupon.usageLimit ? ` / ${coupon.usageLimit}` : ""}
                   </td>
                   <td className="p-3">{coupon.perCustomerLimit ?? "None"}</td>
-                  <td className="p-3">
-                    {coupon.active && !coupon.archivedAt ? "Yes" : "No"}
-                  </td>
+                  <td className="p-3"><StatusBadge>{coupon.archivedAt ? "ARCHIVED" : !coupon.active ? "INACTIVE" : coupon.startsAt && coupon.startsAt > now ? "UPCOMING" : coupon.expiresAt && coupon.expiresAt < now ? "EXPIRED" : "ACTIVE"}</StatusBadge></td>
                   <td className="p-3">
                     {coupon.createdAt.toLocaleDateString("en-BD")}
                   </td>
@@ -221,7 +219,7 @@ export default async function CouponsPage({
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/admin/coupons/${coupon.id}/edit`}
-                        className="rounded-md border px-3 py-2 font-bold"
+                        className="admin-button admin-button-secondary"
                       >
                         Edit
                       </Link>
@@ -236,7 +234,7 @@ export default async function CouponsPage({
                           name="active"
                           value={String(!coupon.active)}
                         />
-                        <button className="rounded-md border px-3 py-2 font-bold">
+                        <button className="admin-button admin-button-secondary">
                           {coupon.active ? "Disable" : "Enable"}
                         </button>
                       </form>
@@ -246,7 +244,7 @@ export default async function CouponsPage({
                           name="couponId"
                           value={coupon.id}
                         />
-                        <button className="rounded-md border px-3 py-2 font-bold">
+                        <button className="admin-button admin-button-secondary">
                           Duplicate
                         </button>
                       </form>
@@ -256,7 +254,7 @@ export default async function CouponsPage({
                           name="couponId"
                           value={coupon.id}
                         />
-                        <button className="rounded-md bg-slate-100 px-3 py-2 font-bold">
+                        <button className="admin-button admin-button-secondary">
                           Archive
                         </button>
                       </form>
@@ -266,7 +264,7 @@ export default async function CouponsPage({
                           name="couponId"
                           value={coupon.id}
                         />
-                        <button className="rounded-md bg-coral/10 px-3 py-2 font-bold text-coral">
+                        <button className="admin-button admin-button-danger">
                           Delete
                         </button>
                       </form>
@@ -274,13 +272,12 @@ export default async function CouponsPage({
                   </td>
                 </tr>
               ))}
+              {!coupons.length ? <AdminEmpty colSpan={14} title="No coupons found" description="Adjust the filters or create a coupon for a new promotion." /> : null}
             </tbody>
           </table>
         </div>
       </section>
-      <p className="text-sm font-bold text-slate-500">
-        Page {page} of {pages}
-      </p>
+      <AdminPagination page={page} pages={pages} href={(next) => `/admin/coupons?q=${encodeURIComponent(q)}&active=${active}&type=${type}&state=${state}&page=${next}`} />
     </AdminShell>
   );
 }

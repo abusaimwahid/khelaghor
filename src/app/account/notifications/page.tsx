@@ -5,6 +5,8 @@ import {
 } from "@/app/actions/customer";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/security";
+import { EmptyState } from "@/components/states";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +55,7 @@ export default async function NotificationsPage({
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <strong className="text-navy">{notification.title}</strong>
+                <div className="flex flex-wrap items-center gap-2"><StatusBadge>{notification.type}</StatusBadge>{!notification.readAt ? <span className="h-2 w-2 rounded-full bg-coral" aria-label="Unread" /> : null}</div><strong className="mt-2 block text-navy">{notification.title}</strong>
                 <p className="text-sm text-slate-600">{notification.body}</p>
                 <p className="mt-1 text-xs font-bold text-slate-500">
                   {notification.createdAt.toLocaleString("en-BD")}
@@ -83,9 +85,8 @@ export default async function NotificationsPage({
           </article>
         ))}
       </div>
-      <p className="text-sm font-bold text-slate-500">
-        Page {page} of {Math.max(1, Math.ceil(total / 25))}
-      </p>
+      {!notifications.length ? <EmptyState title="No notifications" description="Order, return, review and support updates will appear here." /> : null}
+      {total > 25 ? <nav aria-label="Notification pages" className="flex items-center justify-between gap-3"><Link aria-disabled={page <= 1} href={`/account/notifications?page=${Math.max(1, page - 1)}`} className={`kg-button kg-button-secondary ${page <= 1 ? "pointer-events-none opacity-50" : ""}`}>Previous</Link><p className="text-sm font-bold text-slate-500">Page {page} of {Math.ceil(total / 25)}</p><Link aria-disabled={page >= Math.ceil(total / 25)} href={`/account/notifications?page=${Math.min(Math.ceil(total / 25), page + 1)}`} className={`kg-button kg-button-secondary ${page >= Math.ceil(total / 25) ? "pointer-events-none opacity-50" : ""}`}>Next</Link></nav> : null}
     </section>
   );
 }

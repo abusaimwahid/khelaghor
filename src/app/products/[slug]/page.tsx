@@ -102,7 +102,7 @@ export default async function ProductPage({
               </div>
             ))}
           </div>
-          <div className="group relative aspect-square overflow-hidden rounded-[24px] border border-[var(--border)] bg-gradient-to-br from-white to-[#f7fafc] shadow-[var(--shadow-soft)]">
+          <div className="group relative aspect-square overflow-hidden rounded-[var(--radius-hero)] border border-[var(--border)] bg-[var(--surface-soft)] shadow-[var(--shadow-md)]">
             <Image
               src={card.image}
               alt={product.name}
@@ -180,7 +180,7 @@ export default async function ProductPage({
             }))}
           />
 
-          <div className="storefront-surface p-5">
+          <div className="storefront-surface rounded-[var(--radius-panel)] p-5">
             <h2 className="mb-3 flex items-center gap-2 font-black text-navy">
               <Truck /> Delivery
             </h2>
@@ -189,7 +189,7 @@ export default async function ProductPage({
               starts from ৳80 with COD availability.
             </p>
           </div>
-          <div className="grid gap-3 rounded-[18px] bg-gradient-to-br from-[#f2fbf8] to-white p-5 text-sm font-bold text-navy sm:grid-cols-3">
+          <div className="grid gap-3 rounded-[var(--radius-panel)] border border-[var(--border)] bg-[var(--surface-mint)] p-5 text-sm font-bold text-navy sm:grid-cols-3">
             <span className="flex gap-2">
               <ShieldCheck className="h-5 w-5 text-teal" /> Safe curation
             </span>
@@ -203,7 +203,7 @@ export default async function ProductPage({
         </section>
       </div>
 
-      <section className="storefront-surface mt-12 p-6 md:p-8">
+      <section className="storefront-surface mt-12 rounded-[var(--radius-panel)] p-6 md:p-8">
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
           {[
             "Description",
@@ -215,7 +215,7 @@ export default async function ProductPage({
           ].map((tab) => (
             <button
               key={tab}
-              className="rounded-md bg-cream px-4 py-3 font-bold text-navy"
+              className="rounded-[var(--radius-control)] bg-[var(--surface-peach)] px-4 py-3 font-bold text-navy transition hover:bg-coral/10"
             >
               {tab}
             </button>
@@ -237,7 +237,7 @@ export default async function ProductPage({
         ) : null}
       </section>
 
-      <section className="storefront-surface mt-10 p-6 md:p-8">
+      <section className="storefront-surface mt-10 rounded-[var(--radius-panel)] p-6 md:p-8">
         <h2 className="text-2xl font-black text-navy">Approved Reviews</h2>
         {product.reviews.length ? (
           <div className="mt-4 grid gap-2 rounded-md bg-cream p-4 text-sm font-bold text-navy md:grid-cols-5">

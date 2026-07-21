@@ -11,5 +11,5 @@ async function updateProfile(formData: FormData) {
 
 export default async function ProfilePage() {
   const user = await requireUser();
-  return <section className="container py-10"><form action={updateProfile} className="max-w-xl rounded-lg bg-white p-6 shadow-sm"><h1 className="text-3xl font-black text-navy">Profile</h1><input name="name" defaultValue={user.name ?? ""} className="mt-4 w-full rounded-md border p-3" /><input name="phone" defaultValue={user.phone ?? ""} className="mt-4 w-full rounded-md border p-3" /><button className="mt-4 rounded-md bg-coral px-5 py-3 font-black text-white">Save</button></form></section>;
+  return <section className="storefront-surface rounded-[var(--radius-panel)] p-6 md:p-8"><p className="storefront-eyebrow">Personal details</p><h2 className="mt-1 text-2xl font-black text-navy">Profile</h2><form action={updateProfile} className="mt-6 grid max-w-xl gap-5"><label className="font-bold text-navy">Name<input name="name" defaultValue={user.name ?? ""} className="kg-input mt-2" /></label><label className="font-bold text-navy">Phone<input name="phone" defaultValue={user.phone ?? ""} className="kg-input mt-2" /></label><p className="text-sm text-slate-500">Email: {user.email}</p><button className="kg-button kg-button-primary w-fit">Save changes</button></form></section>;
 }

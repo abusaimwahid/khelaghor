@@ -96,7 +96,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             >
               <Menu className="h-5 w-5" />
             </summary>
-            <div className="fixed inset-x-3 top-16 max-h-[calc(100vh-5rem)] overflow-auto rounded-[16px] bg-navy p-4 text-white shadow-2xl">
+            <div className="fixed inset-x-3 top-16 max-h-[calc(100dvh-5rem)] overflow-auto overscroll-contain rounded-[16px] bg-navy p-4 text-white shadow-2xl">
               <AdminNavigation pathname={pathname} />
             </div>
           </details>
@@ -120,9 +120,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
             >
               <ExternalLink className="h-4 w-4" />
             </Link>
-            <button className="admin-icon-button" aria-label="Notifications">
+            <Link href="/admin" className="admin-icon-button" aria-label="Operational alerts">
               <Bell className="h-4 w-4" />
-            </button>
+            </Link>
             <Link
               href="/admin/products/new"
               className="admin-button admin-button-primary"
@@ -210,7 +210,7 @@ export function AdminHero({
           {description}
         </p>
       </div>
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      {actions ? <div className="admin-actions">{actions}</div> : null}
     </header>
   );
 }

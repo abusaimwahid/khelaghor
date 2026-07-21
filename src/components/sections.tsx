@@ -44,14 +44,14 @@ export function SectionHeader({
   eyebrow?: string;
 }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
+    <div className="mb-7 flex items-end justify-between gap-4">
       <div>
         {eyebrow ? (
           <p className="mb-1 text-sm font-black uppercase text-teal">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="text-2xl font-black text-navy md:text-3xl">{title}</h2>
+        <h2 className="text-[var(--text-section-title)] font-black tracking-tight text-navy">{title}</h2>
       </div>
       {href ? (
         <Link
@@ -74,8 +74,8 @@ export function Hero({
 }) {
   if (!section.enabled) return null;
   return (
-    <section className="overflow-hidden bg-gradient-to-br from-cream via-white to-[#e8fbf7]">
-      <div className="container grid min-h-[560px] items-center gap-10 py-12 md:grid-cols-2">
+    <section className="overflow-hidden bg-gradient-to-br from-cream via-white to-[#e8fbf7] py-4 md:py-6">
+      <div className="container grid min-h-[520px] items-center gap-8 rounded-[var(--radius-hero)] border border-[var(--border)] bg-white/70 px-6 py-10 shadow-[var(--shadow-md)] md:grid-cols-2 md:px-12">
         <div>
           <p className="mb-3 inline-flex rounded-full bg-sun/50 px-4 py-2 text-sm font-black text-navy">
             {section.highlightedText}
@@ -89,24 +89,24 @@ export function Hero({
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={section.primaryButtonLink || "/shop"}
-              className="rounded-md bg-coral px-6 py-3 font-black text-white shadow-lg shadow-coral/20"
+            className="kg-button kg-button-primary"
             >
               {section.primaryButtonLabel || "Shop Now"}
             </Link>
             <Link
               href={section.secondaryButtonLink || "/categories"}
-              className="rounded-md border border-[var(--border)] bg-white px-6 py-3 font-black text-navy"
+              className="kg-button kg-button-secondary"
             >
               {section.secondaryButtonLabel || "Explore Categories"}
             </Link>
           </div>
         </div>
         <div className="relative">
-          <div className="aspect-[4/3] rounded-lg bg-white p-5 shadow-2xl">
+          <div className="aspect-[4/3] rounded-[var(--radius-panel)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-md)]">
             {products.length ? (
               <div className="grid h-full grid-cols-2 gap-4">
                 {products.slice(0, 4).map((product) => (
-                  <div key={product.id} className="rounded-lg bg-cream p-4">
+                  <div key={product.id} className="rounded-[var(--radius-card)] bg-cream p-4">
                     <p className="text-sm font-black text-navy">
                       {product.name}
                     </p>
@@ -147,7 +147,7 @@ export function CategoryGrid({
           <Link
             key={category.slug}
             href={`/categories/${category.slug}`}
-            className="rounded-lg border border-[var(--border)] bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-[var(--radius-card)] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-sm)] transition duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-md)]"
           >
             <PackageSearch className="mb-4 h-8 w-8 text-coral" />
             <strong className="text-lg text-navy">{category.name}</strong>

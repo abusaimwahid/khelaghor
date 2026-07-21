@@ -4,6 +4,8 @@ import { money } from "@/lib/utils";
 import { prisma } from "@/server/db";
 import { completeRefund, createRefund } from "@/server/refunds";
 import { requirePermission } from "@/server/security";
+import { AdminEmpty } from "@/components/admin/admin-ui";
+import { StatusBadge } from "@/components/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +37,13 @@ export default async function AdminRefundsPage() {
   await requirePermission("orders.view");
   const [refunds, orders] = await Promise.all([
     prisma.refund.findMany({
-      include: { order: true, returnRequest: true },
+      include: { order: { include: { refunds: true } }, returnRequest: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     }),
     prisma.order.findMany({
       where: { total: { gt: 0 } },
+      include: { refunds: true },
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
@@ -52,7 +55,7 @@ export default async function AdminRefundsPage() {
         description="Manual refund records, partial refund accumulation and safe completion without inventory side effects."
       />
       <section className="kg-card p-6">
-        <h2 className="text-xl font-black text-navy">Create Manual Refund</h2>
+        <h2 className="text-xl font-black text-navy">Create manual refund</h2><p className="mt-2 text-sm text-slate-600">Server-side protection remains authoritative and rejects amounts above the refundable balance.</p>
         <form
           action={createRefundAction}
           className="mt-4 grid gap-3 md:grid-cols-5"
@@ -63,7 +66,7 @@ export default async function AdminRefundsPage() {
           >
             {orders.map((order) => (
               <option key={order.id} value={order.id}>
-                {order.number} • {money(Number(order.total))}
+              {order.number} • maximum {money(Math.max(0, Number(order.total) - order.refunds.filter(refund => refund.status !== "FAILED" && refund.status !== "CANCELLED").reduce((sum, refund) => sum + Number(refund.amount), 0)))}
               </option>
             ))}
           </select>
@@ -82,8 +85,8 @@ export default async function AdminRefundsPage() {
             <option>BKASH</option>
             <option>SSLCommerz</option>
           </select>
-          <button className="rounded-md bg-coral px-4 font-black text-white">
-            Approve
+          <button className="admin-button admin-button-primary">
+            Create refund
           </button>
           <input
             name="reason"
@@ -121,10 +124,10 @@ export default async function AdminRefundsPage() {
               {refunds.map((refund) => (
                 <tr key={refund.id} className="border-t border-[var(--border)]">
                   <td className="p-3 font-black text-navy">{refund.number}</td>
-                  <td className="p-3">{refund.order.number}</td>
-                  <td className="p-3">{money(Number(refund.amount))}</td>
+                  <td className="p-3"><strong className="text-navy">{refund.order.number}</strong><p className="mt-1 text-xs text-slate-500">Order total {money(Number(refund.order.total))}</p></td>
+                  <td className="p-3"><strong>{money(Number(refund.amount))}</strong><p className="mt-1 text-xs text-slate-500">Previously recorded {money(refund.order.refunds.filter(item => item.id !== refund.id && item.status !== "FAILED" && item.status !== "CANCELLED").reduce((sum, item) => sum + Number(item.amount), 0))}</p><p className="text-xs text-slate-500">Maximum remaining {money(Math.max(0, Number(refund.order.total) - refund.order.refunds.filter(item => item.status !== "FAILED" && item.status !== "CANCELLED").reduce((sum, item) => sum + Number(item.amount), 0)))}</p></td>
                   <td className="p-3">{refund.method}</td>
-                  <td className="p-3">{refund.status}</td>
+                  <td className="p-3"><StatusBadge>{refund.status}</StatusBadge></td>
                   <td className="p-3">
                     {refund.createdAt.toLocaleDateString("en-BD")}
                   </td>
@@ -144,7 +147,7 @@ export default async function AdminRefundsPage() {
                           placeholder="External ID"
                           className="h-10 rounded-md border px-2"
                         />
-                        <button className="rounded-md bg-navy px-3 font-bold text-white">
+                        <button className="admin-button bg-navy text-white">
                           Complete
                         </button>
                       </form>
@@ -154,6 +157,7 @@ export default async function AdminRefundsPage() {
                   </td>
                 </tr>
               ))}
+              {!refunds.length ? <AdminEmpty colSpan={7} title="No refunds recorded" description="Manual and return-linked refunds will appear here." /> : null}
             </tbody>
           </table>
         </div>

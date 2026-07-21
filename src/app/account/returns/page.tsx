@@ -2,6 +2,9 @@ import { submitReturnAction } from "@/app/actions/customer";
 import { prisma } from "@/server/db";
 import { requireUser } from "@/server/security";
 import { UploadField } from "@/components/forms/upload-field";
+import { StatusBadge } from "@/components/status-badge";
+import { EmptyState } from "@/components/states";
+import { dhakaDate, money } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -17,16 +20,16 @@ export default async function ReturnsPage() {
   const returns = await prisma.returnRequest.findMany({
     where: { userId: user.id },
     include: {
-      items: { include: { orderItem: true } },
+      order: { include: { refunds: true } }, items: { include: { orderItem: true } },
       history: { orderBy: { createdAt: "asc" } },
       evidence: true,
     },
     orderBy: { createdAt: "desc" },
   });
   return (
-    <section className="container grid gap-8 py-10 lg:grid-cols-[380px_1fr]">
+    <section className="grid gap-5 pb-10 xl:grid-cols-[360px_1fr]">
       <form action={submitReturnAction} className="kg-card h-fit p-6">
-        <h1 className="text-2xl font-black text-navy">Return Request</h1>
+        <p className="storefront-eyebrow">Eligible delivered items</p><h1 className="mt-1 text-2xl font-black text-navy">Request a return</h1><p className="mt-2 text-sm leading-6 text-slate-600">Items are inspected before inventory and refund decisions are completed.</p>
         <label className="mt-4 block font-bold text-navy">
           Order item
           <select name="orderItemId" className="kg-input mt-2">
@@ -78,38 +81,27 @@ export default async function ReturnsPage() {
           className="kg-input mt-4 min-h-28"
         />
         <UploadField name="evidenceUrls" purpose="return-evidence" label="Evidence (images or PDF)" accept="image/*,application/pdf" />
-        <button className="mt-4 rounded-md bg-coral px-5 py-3 font-black text-white">
+        <button disabled={!items.length} className="kg-button kg-button-primary mt-4 w-full disabled:cursor-not-allowed disabled:bg-slate-300">
           Submit
         </button>
       </form>
       <div className="space-y-4">
         {returns.map((ret) => (
-          <article key={ret.id} className="kg-card p-5">
-            <strong className="text-navy">{ret.number}</strong>
-            <p className="text-sm font-bold text-slate-500">
-              {ret.status} • {ret.reason} •{" "}
-              {ret.resolution ?? "No resolution selected"}
-            </p>
+          <article key={ret.id} className="kg-card p-5 sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wide text-slate-500">Return {ret.number}</p><strong className="mt-1 block text-navy">Order {ret.order.number}</strong></div><StatusBadge>{ret.status}</StatusBadge></div>
+            <p className="mt-3 text-sm font-bold text-slate-600">{ret.reason} · {ret.resolution ?? "Resolution pending"}</p>
             <p className="mt-2 text-sm text-slate-600">
               {ret.items
                 .map((item) => `${item.quantity}× ${item.orderItem.name}`)
                 .join(", ")}
             </p>
-            <div className="mt-3 space-y-1 rounded-md bg-cream p-3 text-sm text-slate-600">
-              {ret.history.map((row) => (
-                <p key={row.id}>
-                  {row.createdAt.toLocaleString("en-BD")} • {row.toStatus}{" "}
-                  {row.publicNote ? `• ${row.publicNote}` : ""}
-                </p>
-              ))}
-            </div>
+            {ret.inspectionResult ? <p className="mt-3 rounded-xl bg-[var(--surface-soft)] p-3 text-sm text-slate-700"><strong className="text-navy">Inspection:</strong> {ret.inspectionResult}</p> : null}
+            <ol className="mt-4 space-y-3 border-l-2 border-teal/20 pl-4">{ret.history.map((row) => <li key={row.id} className="relative text-sm text-slate-600"><span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-teal" /><div className="flex flex-wrap items-center gap-2"><StatusBadge>{row.toStatus}</StatusBadge><span className="text-xs">{dhakaDate(row.createdAt)}</span></div>{row.publicNote ? <p className="mt-1">{row.publicNote}</p> : null}</li>)}</ol>
+            {ret.evidence.length ? <div className="mt-4 flex flex-wrap gap-2">{ret.evidence.map((file, index) => <a key={file.id} href={file.url} target="_blank" rel="noreferrer" className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-bold text-coral">Evidence {index + 1}{file.fileName ? ` · ${file.fileName}` : ""}</a>)}</div> : null}
+            {ret.order.refunds.length ? <div className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900"><strong>Refund summary</strong>{ret.order.refunds.map(refund => <p key={refund.id} className="mt-1">{money(Number(refund.amount) + Number(refund.deliveryFeeAmount))} · {refund.status}</p>)}</div> : null}
           </article>
         ))}
-        {!returns.length ? (
-          <p className="kg-card p-5 text-sm font-semibold text-slate-500">
-            No return requests yet.
-          </p>
-        ) : null}
+        {!returns.length ? <EmptyState title="No return requests" description="Eligible delivered items can be submitted from the form on this page." /> : null}
       </div>
     </section>
   );

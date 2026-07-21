@@ -41,10 +41,10 @@ export function ProductCard({
     : 0;
   const unavailable = product.stock <= 0;
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-[var(--border)] bg-white shadow-[0_8px_24px_rgba(16,38,74,.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-hover)]">
+    <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] transition duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-md)]">
       <Link
         href={`/products/${product.slug}`}
-        className="relative block aspect-[1.05/1] overflow-hidden bg-gradient-to-br from-[#fffaf2] to-[#f4f8fb]"
+        className="relative block aspect-square overflow-hidden rounded-b-[var(--radius-card)] bg-[var(--surface-soft)]"
       >
         <Image
           src={product.image}
@@ -84,8 +84,8 @@ export function ProductCard({
         </button>
       </Link>
       <div className="flex flex-1 flex-col gap-2.5 p-4">
-        <p className="truncate text-xs font-black uppercase text-teal">
-          {product.brand}
+        <p className="truncate text-[var(--text-caption)] font-black uppercase tracking-wide text-teal">
+          {product.brand} <span className="text-slate-400">·</span> {product.categoryName}
         </p>
         <Link
           href={`/products/${product.slug}`}

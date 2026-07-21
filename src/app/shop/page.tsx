@@ -58,7 +58,7 @@ export default async function ShopPage({
           <span className="px-2">/</span>
           <span className="text-navy">Shop</span>
         </nav>
-        <section className="storefront-surface overflow-hidden p-6 md:p-8">
+        <section className="storefront-surface overflow-hidden rounded-[var(--radius-panel)] p-6 md:p-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="storefront-eyebrow">Curated for growing minds</p>
@@ -118,14 +118,14 @@ export default async function ShopPage({
         </section>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
-          <aside className="storefront-surface hidden h-fit p-6 lg:sticky lg:top-40 lg:block">
+          <aside className="storefront-surface hidden h-fit rounded-[var(--radius-panel)] p-6 lg:sticky lg:top-40 lg:block">
             <FilterSidebar
               categories={categories}
               brands={brands}
               params={params}
             />
           </aside>
-          <details className="storefront-surface p-4 lg:hidden">
+          <details className="storefront-surface rounded-[var(--radius-panel)] p-4 lg:hidden">
             <summary className="flex items-center gap-2 font-black text-navy">
               <SlidersHorizontal className="h-5 w-5" />
               Filters
@@ -140,7 +140,7 @@ export default async function ShopPage({
           </details>
           <main>
             {cards.length ? (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
                 {cards.map((product, index) => (
                   <ProductCard
                     key={product.id}
